@@ -131,13 +131,7 @@ class TransferPlotter(Plotter):
             row="params.relative_train_size",  # col_wrap=4,
         )
         plt.suptitle("Absolute training size")
-        # plt.yscale("log")
-        # Get the current y-axis limits
-        current_ylim = plt.ylim()
-        # Check if the current ymax is above 200
-        # if current_ylim[1] > 200:
-        #     # Set the ymax to 200
-        #     plt.ylim(current_ylim[0], 200)
+
         plt.ylim(0, 12)
         self.log_figure("abs-training-size")
         print("Plotting absolute transfer budget")
@@ -154,13 +148,7 @@ class TransferPlotter(Plotter):
             row="params.relative_train_size",  # col_wrap=4,
         )
         plt.suptitle("Relative training size ")
-        # plt.yscale("log")
-        # Get the current y-axis limits
-        current_ylim = plt.ylim()
-        # Check if the current ymax is above 200
-        # if current_ylim[1] > 200:
-        #     # Set the ymax to 200
-        #     plt.ylim(current_ylim[0], 200)
+
         plt.ylim(0, 12)
         self.log_figure("rel-training-size")
 
@@ -177,12 +165,7 @@ class Evaluation:
         self.idx = ["model", "env_id", "budget_abs", "rnd", "subject_system"]
         self.experiment_id = mlflow.get_short_valid_id(experiment_name)
         mlflow.set_experiment(experiment_name=RESULTS_EXP)
-        #
-        # self.output_base_path = os.path.join(
-        #     self.results_base_path, f"{my_id}-analysis"
-        # )
-        # os.makedirs(self.output_base_path)
-        # print(f"plotting to {self.output_base_path}")
+
 
     def plot_metadata(self, meta_df=None):
         kwargs = {"run_id": self.run_id} if self.run_id else {"run_name": self.run_name}
@@ -303,9 +286,7 @@ class Evaluation:
         lvl_1_run_id = child_run.run_id
         model = lvl_1_params["params.model"]
         print(f"fetching new model {model}")
-        # Fetch the second-level nested runs for each environment
-        # relative_transfer_budgets = lvl_1_params["params.transfer_budgets"]
-        # relative_transfer_budgets = json.loads(relative_transfer_budgets)
+
         env_runs = child_run.get_sub_runs()
         data_list = []
         for number_of_transfer_samples_env_run in env_runs:
@@ -339,32 +320,8 @@ class Evaluation:
                 print("[LFlow]", e)
                 print(tb)
 
-            # abs_transfer_budgets = [
-            #     int(run_dict["params.loo_budget"]) for run_dict in env_data
-            # ]
-            # unique_abs_budgets = list(np.unique(abs_transfer_budgets))
-            # budget_map = {
-            #     absolute: relative
-            #     for absolute, relative in zip(
-            #         sorted(unique_abs_budgets, reverse=True),
-            #         sorted(relative_transfer_budgets, reverse=True),
-            #     )
-            # }
-            # for run_dict in env_data:
-            #     run_dict["params.loo_budget_rel"] = budget_map[
-            #         int(run_dict["params.loo_budget"])
-            #     ]
-            #
-            # data_list.extend(env_data)
         return data_list
 
-    # def get_sub_runs(self, parent_run_id):
-    #     exp_folder = mlflow.get_experiment_folder(self.experiment_name)
-    #     os.listd
-    #     return mlflow.search_runs(
-    #         experiment_ids=[self.experiment_id],
-    #         filter_string=f"tags.mlflow.parentRunId = '{parent_run_id}' AND status='FINISHED'",
-    #     )
 
     def download_netcdf(self, child_run):
         # MLflow Client initialisieren
@@ -559,24 +516,6 @@ def main():
     import experiment
 
     tracking_url = experiment.MLFLOW_URI
-    # tracking_url = "https://mlflow.sws.informatik.uni-leipzig.de"
-    # parent_run_id = "d843627702ba4dadb2d7e08e99da8720"
-    # parent_run_id = "224331c23c4b4575ba5dfc3ef2d30c04"
-    # parent_run_id = "355878e4baae4be3a2792978e5643026" # jump3r
-    # parent_run_id = "ec5fe58c918046d4a20b8f497c348576"
-    # parent_run_id = "5fbb9d52019a42fba015a4b840ec2b2d"
-    # parent_run_id = "26fcff0b056e4ba5b262c28ef47dc4f9"
-    parent_run_id = "231219-16-04-08-uncertainty-learning-2023-EDnxMVNhCg"
-    parent_run_id = "231220-10-53-08-uncertainty-learning-2023-JEsu9PFWxJ"  # multitask
-    parent_run_id = (
-        "231220-14-06-10-uncertainty-learning-2023-aqSe3L6nWD"  # transfer mini
-    )
-    # parent_run_id = (
-    #     "231220-21-59-44-uncertainty-learning-2023-2yWWUcd6GN"  # transfer gigantic
-    # )
-    # parent_run_id = (
-    #     "240228-17-59-03-uncertainty-learning-2024-fPjWZCZrCa"  # transfer gigantic
-    # )
     parent_run_id = (
         "240314-19-11-13-uncertainty-learning-2024-fSg8uT4skq"
     )

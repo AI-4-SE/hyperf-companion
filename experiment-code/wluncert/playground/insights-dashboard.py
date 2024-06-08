@@ -16,7 +16,7 @@ from fractions import Fraction
 
 import streamlit.components.v1 as components
 import base64
-from microRQdashboard import get_subfolders, read_and_combine_csv, embed_pdf, bayes_palette
+from metricsdashboard import get_subfolders, read_and_combine_csv, embed_pdf, bayes_palette
 
 
 def read_sws_insights(root_dir):

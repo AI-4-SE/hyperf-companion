@@ -3,39 +3,14 @@ This repository provides additional content for the paper "Bayesian Multi-Level 
 Variability of Configurable Software Systems"
 
 ## Paper
-PDF: <a href="/material/paper.pdf">Bayesian Multi-Level Performance Models for Multi-Factor
+PDF: will be linked later <a href="/material/paper.pdf">Bayesian Multi-Level Performance Models for Multi-Factor
 Variability of Configurable Software Systems</a>
 
 <details open>
   <summary><h3>ABSTRACT</h3></summary>
-<p>Configuring a software system for a specific environment and use
-case is challenging. Beyond functionality, configuration options can
-have a substantial influence on performance. Due to combinatorics,
-it is often unclear in practice how to configure a system to yield
-certain performance guarantees. Hence, established approaches aim
-at learning a model that estimates performance given a configura-
-tion. However, multiple factors, such as varying the workload, can
-affect a configuration’s performance in various ways, limiting gen-
-eralizability model-based performance estimations. There are two
-principal approaches in the literature to address this multi-factor
-variability: (1) measure a subset of configurations for varying envi-
-ronments to learn a single, generalized model or (2) learn a distinct
-model for every single environment of the system. We introduce
-a third approach to this mix: Bayesian Multi-level models, called
-HyPerf. In a nutshell, HyPerf builds a single model with multiple
-levels, in which the upper level captures the common influences of
-options across all environments, while the lover level captures the
-environment-specific influences of configuration options. Through
-a large-scale empirical analysis, we assess the prediction accuracy
-of all three approaches on 10 real-world software systems across up
-to 35 environments. Our findings demonstrate HyPerf’s competi-
-tive predictive performance among interpretable models. Moreover,
-we demonstrate that HyPerf allows reasoning on its multiple lev-
-els that enables novel insights, e.g., into which options’ influence
-varies substantially across environments. For the first time, HyPerf
-enables the selection of a representative set of environments that
-covers most option’s variance across environments while disregard-
-ing non-informative environments.</p>
+<p>Configuring software system for a specific environment and use case is challenging. Beyond functionality, configuration options may have a substantial influence on performance. Due to combinatorics, it is often unclear in practice *how* to configure a system to yield certain performance guarantees. Multiple factors, such as varying the workload, may affect the influence of configuration options on performance substantially as recent studies have shown. There are two principal approaches in the literature to address this *multi-factor variance*: (1) measure a subset of configurations for varying environments to learn a single model or (2) learn a distinct model for every single environment of the system.
+
+We introduce a third approach to this mix: *Bayesian Multi-level models*, called HyPerf. The key idea of HyPerf is to explicitly model the uncertainty in performance influences of configuration options arising from the sparsity of training data considering the vast space of possible environments and measurement noise. Capturing common patterns in so-called *hyper priors* in a superior model level, HyPerf generalizes performance influences across multiple factors. Through a large-scale empirical analysis, we assess the prediction accuracy of all three approaches on 10 real-world subject systems across up to 35 environments. Our findings demonstrate HyPerf’s competitive predictive performance among interpretable models. Further variance analysis using HyPerf reveals the prevalence of workload dependency of option's performance influences. We show that, for most software systems, several workloads are necessary to capture most of the intra-environmental variance.</p>
 </details>
 
 <details>
@@ -126,7 +101,7 @@ Ensure you have the following installed on your system:
    ```sh
    sudo add-apt-repository ppa:deadsnakes/ppa
    sudo apt-get update
-   sudo apt-get install -y python3.9 python3.9-dev python3-pip python3-wheel build-essential
+   sudo apt-get install -y python3.9 python3.9-dev python3-pip python3-wheel build-essential python3-distutils python3.9-distutils
    ```
 
 3. **Clone the Repository:**
@@ -149,8 +124,7 @@ Ensure you have the following installed on your system:
    Reinstall specific versions of JAX and JAXLIB to avoid version conflicts:
 
    ```sh
-   python3.9 -m pip install jax==0.4.14
-   python3.9 -m pip install jaxlib==0.4.13
+   python3.9 -m pip install jax==0.4.14 jaxlib==0.4.13
    ```
 
 5. **Run the Experiment:**
@@ -159,21 +133,28 @@ Ensure you have the following installed on your system:
 
    ```sh
    cd wluncert
-   python3.9 main.py --experiment multitask --jobs 1 --reps 30 --store
+   python3.9 main.py --experiment multitask --jobs 1 --reps 1 --store
    ```
+   Here, `--jobs` defines how many modls are trained in parallel. Each jobs employs 3 MCMC chains, resulting in 3 required threads per job.
+   The `--store` option should only be used if insights into posterior distributions are needed, e.g., when replicating the paper's plots through the provided dashboards.
+   While the paper used 30 replications, we recommend reducing `--reps` to 1 to check if everything works. Only a single replication is also necessary to replicate model insights for RQ2 and RQ3.
 
 6. **Run the Analysis:**
 
-   After the experiment completes, run the analysis:
-
+   After the experiment completes, run the dashboard that aggregates accuracy and cost metrics:
+   
    ```sh
    python3.9 modelinsights.py
    ```
 
 7. **Start the Streamlit Dashboard:**
 
-   Finally, start the Streamlit dashboard to visualize the insights:
+   Finally, start the Streamlit dashboard to visualize the metrics:
+   ```sh
+   streamlit run playground/metricsdashboard.py
+   ```
 
+If the experiment was run with the `--store` flag, the dashboard for RQ2 and 3 can be executed:
    ```sh
    streamlit run playground/insights-dashboard.py
    ```
@@ -194,7 +175,7 @@ If you encounter any issues:
     
   </details>
     <details>
-    <summary><h3>Changes for Reproduktion</h3></summary>
+    <summary><h3>Changes for Reproduction</h3></summary>
 To change the software systems, the easiest way is to bring the data from your new software system into the same format as one of the existing software systems. You can find the data in [Training-Data](/experiment-code/wluncert/training-data).
 
 After that, you need to modify `main.py` in the [wluncert](/experiment-code/wluncert/) directory:

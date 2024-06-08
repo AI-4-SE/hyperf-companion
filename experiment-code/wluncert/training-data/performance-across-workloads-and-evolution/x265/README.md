@@ -2,7 +2,7 @@
 
 # Hardware
 
-- Cluster, edison 5a, 5b, 7 partitions
+- anonymized
 
 # Executables
 
