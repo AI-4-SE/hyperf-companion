@@ -16,11 +16,14 @@ from fractions import Fraction
 import streamlit.components.v1 as components
 import base64
 
+pdf_label = "PDF download"
+
 def get_subfolders(parent_folder):
     subfolders = [f.path for f in os.scandir(parent_folder) if f.is_dir()]
     return subfolders
 
 bayes_palette = ["#47AEED", "#398CBF",  "#2F729C"]
+comparison_palette = ["#BF393A"]
 @st.cache_data
 def read_and_combine_csv(subfolders):
     all_dfs = []
@@ -215,8 +218,13 @@ def draw_transfer_dashboard(combined_df):
                 fig,
             )
 
-            with st.expander(label=f"{sws_lbl} PDF Now COMPLETELY FREE!!!1!11!!", expanded=False):
+            with st.expander(label=f"{sws_lbl} {pdf_label}", expanded=False):
                 embed_pdf(tmp_file)
+
+
+def get_default_data_string(parent):
+    name = os.listdir(parent)[0]
+    return name
 
 
 def main():
@@ -242,15 +250,8 @@ def main():
             selected_subfolders = st.multiselect(
                 "Select Subfolders",
                 folder_names,
-                # default=["240316-20-16-41-aggregation-bWn627g4jN",
-                #          "240317-14-51-05-aggregation-dNPobw6xky",
-                #          "240318-14-27-26-aggregation-WLFgXnWyqc",
-                #          "240319-11-56-40-aggregation-gn5W8tJhaY"],
-                default=[
-                        "240321-19-59-19-aggregation-bTLYxz3uFg", # old bayesian multitask
-                         # "240319-22-38-13-aggregation-dwnJojszkX", # new lasso grid
-                         "240322-13-08-04-aggregation-NKUie5gttU", # 0.9 CI
-                         ],
+
+                default=[get_default_data_string(parent_folder)],
             )
 
             if (
@@ -285,6 +286,7 @@ def main():
 
             days, hours, minutes, seconds_remaining  = seconds_to_days(total_time)
 
+            st.warning("If plots look broken, press <r> to re-run dashboard")
             st.write("## Time Cost in Compute Time")
             col_days, col1, col2, col3 = st.columns(4)
             with col_days:
@@ -328,7 +330,7 @@ def convert_to_frac(value):
 def draw_multitask_paper_plot(combined_df,     system_col="params.software-system",
     model_col="params.model",
     cat_col="params.pooling_cat",):
-    st.dataframe(combined_df)
+    # st.dataframe(combined_df)
     st.write("Filter models ...")
     wanted_models = {
         "mcmc": "Bayesian",
@@ -365,7 +367,7 @@ def draw_multitask_paper_plot(combined_df,     system_col="params.software-syste
     melted_df["Metric"] = melted_df["Metric"].str.replace("metrics.", "")
     melted_df = melted_df.loc[melted_df["Metric"].isin(col_mapper)]
     melted_df["Metric"] = melted_df["Metric"].replace(col_mapper)
-    #st.dataframe(melted_df)
+
 
     pooling_cat_lbl = "Pooling"
     relative_train_size_lbl = "Relative Train Size"
@@ -393,7 +395,7 @@ def draw_multitask_paper_plot(combined_df,     system_col="params.software-syste
     plot_df = copy.deepcopy(melted_df)
     melted_df=melted_df.drop(columns=["Pooling"])
     melted_df[subject_system_lbl] = melted_df[subject_system_lbl].apply(lambda x: f'\\sws{{{x}}}')
-    st.dataframe(melted_df)
+    # st.dataframe(melted_df)
 
     # melted_df = melted_df.loc[melted_df[relative_train_size_lbl].isin([0.25,0.5,0.75,1,3])]
 
@@ -420,60 +422,66 @@ def draw_multitask_paper_plot(combined_df,     system_col="params.software-syste
             r" &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\":"",
     }
     mape_df = melted_df[['Subject System', 'Relative Train Size', 'Model', "Metric", "Value"]]
-    st.write("## Latex Tables.")
-    with st.expander("all MAPES!", expanded=False):
-        # grouped_mape = mape_df.groupby(['Subject System', 'Relative Train Size', 'Model', pooling_cat_lbl, "Metric",]).mean().reset_index()
-        # st.dataframe(grouped_mape)
-        all_mapes_ape  = mape_df.loc[mape_df[relative_train_size_lbl].isin([0.25,0.5,0.75,1])]
-        initial_pivot = all_mapes_ape.pivot_table(index=['Subject System'],
-                                         columns=['Model', 'Metric', 'Relative Train Size'],
-                                         values='Value',
-                                         aggfunc='mean')
-        st.dataframe(initial_pivot)
-        rounded_scores = initial_pivot.applymap(lambda x: float(round(x, 1)) if isinstance(x, (int, float)) else x)
-        st.dataframe(rounded_scores)
-        rounded_scores.to_csv("./results-rq1.csv")
-        latex_str = rounded_scores.to_latex(index=True, multirow=True, multicolumn=True,
-                                            multicolumn_format='c', column_format='r' + 'r' * rounded_scores.shape[1],
-                                            escape=False,
-                                            float_format="{:0.1f}".format)
 
-        for pattern, replacement in replacements.items():
-            latex_str = latex_str.replace(pattern, replacement)
-        st.latex(latex_str)
-        st.write(os.getcwd())
+    debug = False
+    if debug:
+
+        st.write("## Latex Tables.")
+        with st.expander("all MAPES!", expanded=False):
+            # grouped_mape = mape_df.groupby(['Subject System', 'Relative Train Size', 'Model', pooling_cat_lbl, "Metric",]).mean().reset_index()
+            # st.dataframe(grouped_mape)
+            all_mapes_ape  = mape_df.loc[mape_df[relative_train_size_lbl].isin([0.25,0.5,0.75,1])]
+            initial_pivot = all_mapes_ape.pivot_table(index=['Subject System'],
+                                             columns=['Model', 'Metric', 'Relative Train Size'],
+                                             values='Value',
+                                             aggfunc='mean')
+            st.dataframe(initial_pivot)
+            rounded_scores = initial_pivot.applymap(lambda x: float(round(x, 1)) if isinstance(x, (int, float)) else x)
+            st.dataframe(rounded_scores)
+            rounded_scores.to_csv("./results-rq1.csv")
+            latex_str = rounded_scores.to_latex(index=True, multirow=True, multicolumn=True,
+                                                multicolumn_format='c', column_format='r' + 'r' * rounded_scores.shape[1],
+                                                escape=False,
+                                                float_format="{:0.1f}".format)
+
+            for pattern, replacement in replacements.items():
+                latex_str = latex_str.replace(pattern, replacement)
+            st.latex(latex_str)
+            st.write(os.getcwd())
 
 
-    with st.expander("MAPE ONLY", expanded=False):
-        # grouped_mape = mape_df.groupby(['Subject System', 'Relative Train Size', 'Model', pooling_cat_lbl, "Metric",]).mean().reset_index()
-        # st.dataframe(grouped_mape)
+        with st.expander("MAPE ONLY", expanded=False):
+            # grouped_mape = mape_df.groupby(['Subject System', 'Relative Train Size', 'Model', pooling_cat_lbl, "Metric",]).mean().reset_index()
+            # st.dataframe(grouped_mape)
 
-        mapes_only_df = melted_df.loc[melted_df[relative_train_size_lbl].isin([0.125,0.25,0.5,0.75,1,2,3])]
-        mape_only_df = mapes_only_df.loc[mapes_only_df["Metric"].isin([col_mapper["mape"]])]
-        mape_only_df.drop(columns=["Metric"])
-        # initial_pivot = mape_only_df.pivot_table(index=['Subject System'],
-        #                                  columns=['Model', 'Metric', 'Relative Train Size'],
-        #                                  values='Value',
-        #                                  aggfunc='mean')
-        initial_pivot = mape_only_df.pivot_table(index=['Relative Train Size'],
-                                         columns=['Model', 'Metric',],
-                                         values='Value',
-                                         aggfunc='mean')
-        st.dataframe(initial_pivot)
-        rounded_scores = initial_pivot.applymap(lambda x: float(round(x, 1)) if isinstance(x, (int, float)) else x)
-        st.dataframe(rounded_scores)
-        rounded_scores.to_csv("./results-rq1.csv")
-        latex_str = rounded_scores.to_latex(index=True, multirow=True, multicolumn=True,
-                                            multicolumn_format='c', column_format='r' + 'r' * rounded_scores.shape[1],
-                                            escape=False,
-                                            float_format="{:0.1f}".format)
-        for pattern, replacement in replacements.items():
-            latex_str = latex_str.replace(pattern, replacement)
+            mapes_only_df = melted_df.loc[melted_df[relative_train_size_lbl].isin([0.125,0.25,0.5,0.75,1,2,3])]
+            mape_only_df = mapes_only_df.loc[mapes_only_df["Metric"].isin([col_mapper["mape"]])]
+            mape_only_df.drop(columns=["Metric"])
+            # initial_pivot = mape_only_df.pivot_table(index=['Subject System'],
+            #                                  columns=['Model', 'Metric', 'Relative Train Size'],
+            #                                  values='Value',
+            #                                  aggfunc='mean')
+            initial_pivot = mape_only_df.pivot_table(index=['Relative Train Size'],
+                                             columns=['Model', 'Metric',],
+                                             values='Value',
+                                             aggfunc='mean')
+            st.dataframe(initial_pivot)
+            rounded_scores = initial_pivot.applymap(lambda x: float(round(x, 1)) if isinstance(x, (int, float)) else x)
+            st.dataframe(rounded_scores)
+            rounded_scores.to_csv("./results-rq1.csv")
+            latex_str = rounded_scores.to_latex(index=True, multirow=True, multicolumn=True,
+                                                multicolumn_format='c', column_format='r' + 'r' * rounded_scores.shape[1],
+                                                escape=False,
+                                                float_format="{:0.1f}".format)
+            for pattern, replacement in replacements.items():
+                latex_str = latex_str.replace(pattern, replacement)
 
-        st.text_area("output", latex_str)
+            st.text_area("### Paper latex output", latex_str)
 
-    with st.expander("pMAPE ONLY", expanded=True):
+    with st.expander("RQ 1 MAPE data", expanded=True):
+        st.write("RQ1 data including 30 repetitions.")
         mapeci_only_df = mape_df.loc[melted_df["Metric"].isin([col_mapper["pmape_ci"]])]
+        st.dataframe(mapeci_only_df)
         # st.dataframe(mapeci_only_df)
         mapeci_only_df = mapeci_only_df.drop(columns=["Metric"])
 
@@ -500,7 +508,7 @@ def draw_multitask_paper_plot(combined_df,     system_col="params.software-syste
                 # Prepend "X" to the value of the cell with the minimum error
                 rounded_scores.loc[system, (rel_train_size, min_model)] = "\\cellcolor{tabSignal}" + str(rounded_scores.loc[system, (rel_train_size, min_model)])
                 # pivot_df.loc[system, (rel_train_size, min_model)] = "X" + str(pivot_df.loc[system, (rel_train_size, min_model)])
-        st.dataframe(rounded_scores)
+        # st.dataframe(rounded_scores)
         rounded_scores.to_csv("./results-rq1.csv")
         # column_format = 'l' + ('|' + 'r' * subcols_per_model) * num_models
 
@@ -522,7 +530,7 @@ def draw_multitask_paper_plot(combined_df,     system_col="params.software-syste
             latex_str = latex_str.replace(pattern, replacement)
         # latex_str = latex_str.replace("\\\\", "\\\\"+os.linesep)
         # st.latex(latex_str)
-        st.text_area("output", latex_str)
+        st.text_area("Paper latex output", latex_str)
 
 
 
@@ -538,92 +546,138 @@ def draw_multitask_paper_plot(combined_df,     system_col="params.software-syste
     # }
 
     with st.spinner("Waiting for plot to be rendered"):
-        model_order = ["Lasso", "Bayesian", "Mean"]
-        # bayes_palette = sns.color_palette("YlOrBr", 3)
-         # ["blue", "green", "red"] # sns.color_palette("flare", 3)
-        model_colors = {
-            # "Lasso": "blue",
-            # "Bayesian": "green",
-            bnp: bayes_palette[0],
-            bpp: bayes_palette[1],
-            bcp: bayes_palette[2],
-            # "Mean": "dimgrey",
-            wanted_models["model_lassocv_reg_no_pool"]: "#BF393A",
-            wanted_models["model_lassocv_reg_cpool"]: "#BF393A",
-            # wanted_models["dummy"]: "black",
+        with sns.plotting_context("talk"):
+            model_order = ["Lasso", "Bayesian", "Mean"]
+            # bayes_palette = sns.color_palette("YlOrBr", 3)
+            # ["blue", "green", "red"] # sns.color_palette("flare", 3)
+            model_colors = {
+                # "Lasso": "blue",
+                # "Bayesian": "green",
+                bnp: bayes_palette[0],
+                bpp: bayes_palette[1],
+                bcp: bayes_palette[2],
+                # "Mean": "dimgrey",
+                wanted_models["model_lassocv_reg_no_pool"]: comparison_palette[0],
+                wanted_models["model_lassocv_reg_cpool"]: comparison_palette[0],
+                # wanted_models["dummy"]: "black",
+            }
 
+            model_order = list(model_colors)
+            plot_df_filtered = plot_df.loc[plot_df["Metric"].isin([col_mapper["pmape_ci"]])]
+            st.write("### Plot Data")
+            st.dataframe(plot_df_filtered)
+            plot = sns.relplot(
+                data=plot_df_filtered,
+                x=relative_train_size_lbl,
+                y="Value",
+                kind="line",
+                hue="Model",
+                style="Pooling",
+                # style_order=["MAPE", "MAPEci"],
+                style_order=["complete", "partial", "no"],
+                facet_kws={"sharey": False, "sharex": True},
+                hue_order=model_order,  # Ensuring the order is applied
+                palette=model_colors,
+                aspect=1.2,
+                # height=1.85,
+                height=2.85,
+                col="Subject System",
+                col_wrap= 5,
+                legend=True,
+            )
+        st.write("## Plot")
 
+        for ax in plt.gcf().axes:
+            title = ax.get_title()
+            _, y_max = ax.get_ylim()
+            if "x264" in title:
+                upper_pMAPE = 120
+            else:
+                upper_pMAPE = 400
+            y_max = min(upper_pMAPE, y_max)
+            ax.set_ylim(0, y_max)
+            # ax.set_xticks([0.5,1,3])
+            ax.set_xticks([0,1,2,3])
+            title = ax.get_title()
+            new_title = title.replace("Subject System = ", "")
+            ax.set_title(new_title)#, fontsize=16)
+            ax.set_ylabel("")
+            # if ax.legend_:
+            #     ax.legend_.remove()
+        fig = plt.gcf()
+        #     fig.canvas.draw()
+        #     time.sleep(0.1)
 
+        handles, labels = plot.axes[0].get_legend_handles_labels()
+        # st.write(labels)
+        model_padded_handles = [*handles[6:]]
+        model_padded_labels =[*labels[6:]]
+        pooling_padded_handles = [*handles[:6]]
+        pooling_padded_labels = [*labels[:6]]
+
+        # padded_handles = [*handles[6:], None, None, None, *handles[:6]]
+        # padded_labels =[*labels[6:], None ," ", None, *labels[:6]]
+        pooling_padded_labels[0] = "Model"
+
+        legend_kw_args = {
+            "frameon" : False,
+            "prop": {'weight': 'normal'},  # Explicitly setting the font weight to normal
+            # "fontsize" : 13,
+            # "edgecolor": "black",  # Set the border color to black
         }
 
-        model_order = list(model_colors)
-        plot_df_filtered = plot_df.loc[plot_df["Metric"].isin([col_mapper["pmape_ci"]])]
-        st.dataframe(plot_df_filtered)
-        plot = sns.relplot(
-            data=plot_df_filtered,
-            x=relative_train_size_lbl,
-            # x="params.loo_budget_rel",
-            y="Value",
-            kind="line",
-            hue="Model",
-            style="Pooling",
-            # style_order=["MAPE", "MAPEci"],
-            style_order=["complete", "partial", "no"],
-            facet_kws={"sharey": False, "sharex": True},
-            # palette=palette_,
-            hue_order=model_order,  # Ensuring the order is applied
-            palette=model_colors,
-            aspect=1.2,
-            height=2.9,
-            col="Subject System",
-            col_wrap= 5,
-            legend=True,
+        plot._legend.remove()
+        model_legend = fig.legend(
+            model_padded_handles,
+            model_padded_labels,
+            loc='upper left',  # Adjusts legend position relative to the anchor.
+            ncol=1,  # Assumes you want all items in one row; adjust as needed.
+            # bbox_to_anchor=(0.5, -0.0015)  # Centers the legend below the plot. Adjust Y-offset as needed.
+            bbox_to_anchor=(0.91, 0.5),
+            **legend_kw_args
         )
-    st.write("## Plot")
-
-    for ax in plt.gcf().axes:
-        title = ax.get_title()
-        _, y_max = ax.get_ylim()
-        if "x264" in title:
-            upper_pMAPE = 120
-        else:
-            upper_pMAPE = 400
-        y_max = min(upper_pMAPE, y_max)
-        ax.set_ylim(0, y_max)
-        # ax.set_xticks([0.5,1,3])
-        ax.set_xticks([0,1,2,3])
-        title = ax.get_title()
-        new_title = title.replace("Subject System = ", "")
-        ax.set_title(new_title)
-        ax.set_ylabel("")
-        # if ax.legend_:
-        #     ax.legend_.remove()
-    fig = plt.gcf()
-    #     fig.canvas.draw()
-    #     time.sleep(0.1)
 
 
-    handles, labels = plot.axes[0].get_legend_handles_labels()
-    padded_handles = [*handles[:4], None, None,  *handles[4:]]
-    padded_labels =[*labels[:4], None, None, *labels[4:]]
-    fig.legend(
-        padded_handles,
-        padded_labels,
-        loc='upper center',  # Adjusts legend position relative to the anchor.
-        ncol=len(padded_handles),  # Assumes you want all items in one row; adjust as needed.
-        frameon=True,
-        bbox_to_anchor=(0.5, -0.0015)  # Centers the legend below the plot. Adjust Y-offset as needed.
-    )
-    plot._legend.remove()
+        pooling_legend = fig.legend(
+            pooling_padded_handles,
+            pooling_padded_labels,
+            loc='lower left',  # Adjusts legend position relative to the anchor.
+            ncol=1,  # Assumes you want all items in one row; adjust as needed.
+            # bbox_to_anchor=(0.5, -0.0015)  # Centers the legend below the plot. Adjust Y-offset as needed.
+            bbox_to_anchor=(0.91, 0.5),
+            **legend_kw_args
 
+        )
 
-    tmp_file = "streamlit-last-results-multitask.pdf"
-    plt.savefig(tmp_file, bbox_inches='tight')
-    fig.savefig("temp_plot.png", bbox_inches="tight", dpi=300)
-    st.image("temp_plot.png")
+        fig.add_artist(pooling_legend)
 
-    with st.expander(label="Get Your PDF Now COMPLETELY FREE!!!1!11!!", expanded=False):
-        embed_pdf(tmp_file)
+        fig.add_artist(model_legend)
+        # '''
+        # fig.legend(
+        #     padded_handles,
+        #     padded_labels,
+        #     loc='upper center',  # Adjusts legend position relative to the anchor.
+        #     ncol=1,  # Assumes you want all items in one row; adjust as needed.
+        #     frameon=True,
+        #     # bbox_to_anchor=(0.5, -0.0015)  # Centers the legend below the plot. Adjust Y-offset as needed.
+        #     bbox_to_anchor=(1, 0.5)  # Centers the legend below the plot. Adjust Y-offset as needed.
+        # )
+        # '''
+
+        # Change the size of the x and y axis labels
+        # for ax in plot.axes.flat:
+        #     ax.set_xlabel(ax.get_xlabel())#, fontsize=16)
+        #     ax.set_ylabel(ax.get_ylabel())#, fontsize=16)
+        #     ax.tick_params(axis='both', which='major')#, labelsize=12)
+
+        tmp_file = "streamlit-last-results-multitask.pdf"
+        plt.savefig(tmp_file, bbox_inches='tight')
+        fig.savefig("temp_plot.png", bbox_inches="tight", dpi=300)
+        st.image("temp_plot.png")
+
+        with st.expander(label=pdf_label, expanded=False):
+            embed_pdf(tmp_file)
+
 
 
 def draw_multitask_dashboard(combined_df):
@@ -783,7 +837,7 @@ def plot_multitask(
         fig.savefig("temp_plot.png", bbox_inches="tight", dpi=300)
         st.image("temp_plot.png")
 
-        with st.expander(label="Get Your PDF Now COMPLETELY FREE!!!1!11!!", expanded=False):
+        with st.expander(label=pdf_label, expanded=False):
             embed_pdf(tmp_file)
 
         # st.pyplot(fig)
@@ -803,8 +857,8 @@ def filter_result_df(
     all_poolings = combined_df[cat_col].unique()
     with col1:
         defaut_metrics = [
-            "mape",
-            # "mape_ci",
+            # "mape",
+            "pmape_ci",
             # "relative_DOF",
             # "test_set_log-likelihood",
         ]
@@ -819,7 +873,8 @@ def filter_result_df(
         if not systems:
             systems = all_systems
     with col3:
-        s_models = st.multiselect("Select Models", all_models, default=all_models[:2])
+        models_excluding_dummy = [model for model in all_models if "dummy" not in model]
+        s_models = st.multiselect("Select Models", all_models, default=models_excluding_dummy)
         if not s_models:
             s_models = all_models
     with col4:

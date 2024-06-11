@@ -21,6 +21,7 @@ We introduce a third approach to this mix: *Bayesian Multi-level models*, called
   </details>
   <details>
     <summary><h3>RQ1</h3></summary>
+
   </details>
   <details>
     <summary><h3>RQ2</h3></summary>
@@ -31,10 +32,11 @@ We introduce a third approach to this mix: *Bayesian Multi-level models*, called
 </details>
 <details open>
   <summary><h2>Replication Package</h2></summary>
-   ### Experiment Parameters
+   <h3>Experiment Parameters</h3>
+
    For running the experiments with any of the ways explained below, there are different parameters to be adjusted:
    - `--jobs` defines how many models are trained in parallel. Increasing it reduces the total run time without altering the results.
-   Each jobs employs 3 MCMC chains, resulting in 3 required threads per job. That is, for 6 available threads, choose `--jobs 2`.
+   Each jobs employs 3 MCMC chains, resulting in 3 required threads per job. E.g., for 6 available threads, choose `--jobs 2`.
    - `--store` should only be used if insights into posterior distributions are needed, e.g., when replicating the paper's plots through the provided dashboards.
    - `--reps` defines the number of repetitions. While the paper used 30 repetitions, we recommend reducing to 1 to check if everything works.
    - `--training-set-size` disables the sweep over different training set sizes and, instead, only uses the given size. Passing 0.5 will train on 0.5N training data for all software systems listed in the main.py.
@@ -65,7 +67,7 @@ We introduce a third approach to this mix: *Bayesian Multi-level models*, called
    - `--jobs` defines how many models are trained in parallel. Each jobs employs 3 MCMC chains, resulting in 3 required threads per job.
    - Run the following command:
      ```sh
-     docker build ./
+     docker build ./ -t hyperf/repl
      ```
      
 4. **Run the Docker Container:**

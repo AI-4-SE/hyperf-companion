@@ -94,6 +94,8 @@ def main():
         nargs="*",
         help="allows selecting individual experiments",
     )
+    parser.add_argument('--training-set-size', type=float,
+                        help="Disables the sweep over different training set sizes and uses the given size")
     args = parser.parse_args()
     n_jobs = args.jobs
     debug = args.debug
@@ -101,6 +103,7 @@ def main():
     do_store = args.store
     num_reps = args.reps
     rep_offset = args.rep_offset
+    training_set_size = args.training_set_size
     chosen_experiments = [experiment_class_labels[e] for e in args.experiments]
     print("Preparing experiments", chosen_experiments)
 
@@ -225,13 +228,12 @@ def main():
             "dconvert",
             "H2",
         )
+        if training_set_size is not None:
+            train_sizes = (
+                training_set_size,
+            )
         chosen_model_lbls = []
 
-        # chosen_model_lbls.extend(["no-pooling-lin"])
-        # chosen_model_lbls.extend(["cpooling-lin"])
-        # chosen_model_lbls.extend(["cpooling-rf"])
-        # chosen_model_lbls.extend(["no-pooling-rf"])
-        # # chosen_model_lbls.extend(["partial-pooling-mcmc-robust-adaptive-shrinkage-pw"])
 
         #FINALS
         chosen_model_lbls.extend(["no-pooling-mcmc-1model"])
@@ -246,13 +248,6 @@ def main():
         chosen_model_lbls.extend(["model_lassocv_reg_no_pool"])
         chosen_model_lbls.extend(["model_lassocv_reg_cpool"])
 
-        # chosen_model_lbls.extend(["mcmc-selfstd-const-hyper"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-RHS"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-RHS-pw"])
-
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-robust"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-horseshoe"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-horseshoe-pw"])
 
     models = {k: v for k, v in models.items() if k in chosen_model_lbls}
 
@@ -275,10 +270,6 @@ def main():
         replication_lbl=rep_lbl,
     )
     run_id = rep.run()
-    # if do_store:
-    #     experiment_base_path = rep.store()
-    #     al = Analysis(experiment_base_path)
-    #     al.run()
 
     # eval = Evaluation()
     print("DONE with experiment.")
@@ -286,7 +277,6 @@ def main():
     eval = mlfloweval.Evaluation(run_id, MLFLOW_URI, EXPERIMENT_NAME)
     eval.run()
 
-    # eval.plot_errors()
 
 
 def get_all_models(debug, n_jobs, plot, do_store=False):

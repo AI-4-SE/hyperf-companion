@@ -4,12 +4,16 @@ FROM ubuntu:22.04
 # Set noninteractive mode for apt-get
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install common software
-RUN apt-get update && apt-get install -y \
-    software-properties-common \
+# Install common software and necessary dependencies
+RUN apt-get update && \
+    apt-get install -y \
     git \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    pkg-config \
+    libhdf5-dev \
+    software-properties-common
+
+#RUN apt-get clean
+#RUN rm -rf /var/lib/apt/lists/*
 
 # Set the working directory in the container
 WORKDIR /app
@@ -30,8 +34,10 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
 # Reinstall jax with another version, doesn't work inside requirements.txt because of faulty pip version conflicts
-RUN python -m pip install jax==0.4.14 && \
-    python -m pip install jaxlib==0.4.13
+#RUN python -m pip install jax==0.4.14 # && \
+#    python -m pip install jaxlib==0.4.13
+
+RUN python -m pip install jax[cpu]==0.4.18 jaxlib==0.4.18
 
 # Change directory to wluncert/
 WORKDIR /app/wluncert
@@ -39,11 +45,8 @@ WORKDIR /app/wluncert
 # Create a "tmp" folder in the working directory
 RUN mkdir /app/wluncert/tmp
 
-# Run experiment, each job needs 3 cores; set higher if your machine allows it
-RUN python main.py --experiment multitask --jobs 1 --reps 1 --store
+# Expose necessary ports for the Streamlit dashboards
+EXPOSE 8083 8084
 
-# Run analysis of experiments
-RUN python modelinsights.py
-
-# Command to run the streamlit dashboard
-CMD ["streamlit", "run", "playground/insights-dashboard.py"]
+# Command to run the entrypoint script
+ENTRYPOINT ["python3.9", "/app/entrypoint.py"]
