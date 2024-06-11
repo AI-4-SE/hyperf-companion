@@ -13,8 +13,8 @@ Variability of Configurable Software Systems</a>
 We introduce a third approach to this mix: *Bayesian Multi-level models*, called HyPerf. The key idea of HyPerf is to explicitly model the uncertainty in performance influences of configuration options arising from the sparsity of training data considering the vast space of possible environments and measurement noise. Capturing common patterns in so-called *hyper priors* in a superior model level, HyPerf generalizes performance influences across multiple factors. Through a large-scale empirical analysis, we assess the prediction accuracy of all three approaches on 10 real-world subject systems across up to 35 environments. Our findings demonstrate HyPerf’s competitive predictive performance among interpretable models. Further variance analysis using HyPerf reveals the prevalence of workload dependency of option's performance influences. We show that, for most software systems, several workloads are necessary to capture most of the intra-environmental variance.</p>
 </details>
 
-<details>
-  <summary><h2>SUP Material</h2></summary>
+<details open>
+  <summary><h2>Supplementary Material</h2></summary>
   
   <details>
     <summary><h3>Software Systems</h3></summary>
@@ -29,9 +29,23 @@ We introduce a third approach to this mix: *Bayesian Multi-level models*, called
     <summary><h3>RQ3</h3></summary>
   </details>
 </details>
-<details>
-  <summary><h2>Experiment Code</h2></summary>
+<details open>
+  <summary><h2>Replication Package</h2></summary>
   <details>
+
+   ### Experiment Parameters
+   For running the experiments with any of the ways explained below, there are different parameters to be adjusted:
+   - `--jobs` defines how many models are trained in parallel. Increasing it reduces the total run time without altering the results.
+   Each jobs employs 3 MCMC chains, resulting in 3 required threads per job. That is, for 6 available threads, choose `--jobs 2`.
+   - `--store` should only be used if insights into posterior distributions are needed, e.g., when replicating the paper's plots through the provided dashboards.
+   - `--reps` defines the number of repetitions. While the paper used 30 repetitions, we recommend reducing to 1 to check if everything works.
+   - `--training-set-size` disables the sweep over different training set sizes and, instead, only uses the given size. Passing 0.5 will train on 0.5N training data for all software systems listed in the main.py.
+   - Recomended Presets
+     - To replicate RQ1, choose `--reps 30` and do not set the `--store` flag because it will likeliy fill up the hard disk.
+     - To replicate RQ2 and RQ3, choose `--reps 1 --store --training-set-size 3`, as posterior distributions must be stored, while only models the first random seed `0` were analyzed.
+
+
+
     <summary><h3>Run as Docker (Replication)</h3></summary>
     To run the full experiment via Docker, follow these steps:
 
@@ -48,6 +62,8 @@ We introduce a third approach to this mix: *Bayesian Multi-level models*, called
 3. **Build the Docker Image:**
    - Open a terminal.
    - Change your directory to `path-of-repo/multilvl-models-multi-factor-variab/experiment-code`.
+   - In the `Dockerfile`, identify the line containing `python3.9 main` and adjust the experiment parameters: 
+   - `--jobs` defines how many models are trained in parallel. Each jobs employs 3 MCMC chains, resulting in 3 required threads per job.
    - Run the following command:
      ```sh
      docker build ./
@@ -58,7 +74,7 @@ We introduce a third approach to this mix: *Bayesian Multi-level models*, called
      ```sh
      docker run <image-id>
      ```
-   - Explore the Streamlit dashboard.
+   - Explore the Streamlit dashboard at https://localhost:8051.
      
 5. **Copy the results:**
    - To copy the results outside the docker use:
@@ -135,7 +151,7 @@ Ensure you have the following installed on your system:
    cd wluncert
    python3.9 main.py --experiment multitask --jobs 1 --reps 1 --store
    ```
-   Here, `--jobs` defines how many modls are trained in parallel. Each jobs employs 3 MCMC chains, resulting in 3 required threads per job.
+   Here, `--jobs` defines how many models are trained in parallel. Each jobs employs 3 MCMC chains, resulting in 3 required threads per job.
    The `--store` option should only be used if insights into posterior distributions are needed, e.g., when replicating the paper's plots through the provided dashboards.
    While the paper used 30 replications, we recommend reducing `--reps` to 1 to check if everything works. Only a single replication is also necessary to replicate model insights for RQ2 and RQ3.
 

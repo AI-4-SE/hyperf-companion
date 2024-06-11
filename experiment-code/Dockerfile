@@ -29,15 +29,18 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 # Install any needed packages specified in requirements.txt
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
-# Reinstall jax with other version, doesnt work inside requierments.txt cause of faulty pip version conficts
+# Reinstall jax with another version, doesn't work inside requirements.txt because of faulty pip version conflicts
 RUN python -m pip install jax==0.4.14 && \
     python -m pip install jaxlib==0.4.13
 
 # Change directory to wluncert/
 WORKDIR /app/wluncert
 
-# Run experiment, each job needs 3 cores set higher if your maschine allows it
-RUN python main.py  --experiment multitask --jobs 1 --reps 30 --store
+# Create a "tmp" folder in the working directory
+RUN mkdir /app/wluncert/tmp
+
+# Run experiment, each job needs 3 cores; set higher if your machine allows it
+RUN python main.py --experiment multitask --jobs 1 --reps 1 --store
 
 # Run analysis of experiments
 RUN python modelinsights.py
