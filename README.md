@@ -31,8 +31,6 @@ We introduce a third approach to this mix: *Bayesian Multi-level models*, called
 </details>
 <details open>
   <summary><h2>Replication Package</h2></summary>
-  <details>
-
    ### Experiment Parameters
    For running the experiments with any of the ways explained below, there are different parameters to be adjusted:
    - `--jobs` defines how many models are trained in parallel. Increasing it reduces the total run time without altering the results.
@@ -46,6 +44,7 @@ We introduce a third approach to this mix: *Bayesian Multi-level models*, called
 
 
 
+<details>
     <summary><h3>Run as Docker (Replication)</h3></summary>
     To run the full experiment via Docker, follow these steps:
 
