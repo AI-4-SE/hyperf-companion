@@ -3,8 +3,7 @@ This repository provides additional content for the paper "Bayesian Multi-Level 
 Variability of Configurable Software Systems"
 
 ## Paper
-PDF: will be linked later <a href="/material/paper.pdf">Bayesian Multi-Level Performance Models for Multi-Factor
-Variability of Configurable Software Systems</a>
+PDF: will be linked later
 
 ## ABSTRACT</h3>
 Configuring software system for a specific environment and use case is challenging. Beyond functionality, configuration options may have a substantial influence on performance. Due to combinatorics, it is often unclear in practice *how* to configure a system to yield certain performance guarantees. Multiple factors, such as varying the workload, may affect the influence of configuration options on performance substantially as recent studies have shown. There are two principal approaches in the literature to address this *multi-factor variance*: (1) measure a subset of configurations for varying environments to learn a single model or (2) learn a distinct model for every single environment of the system.
