@@ -124,7 +124,7 @@ Example for Z3:
 4. **Run custom experiments with the Docker Container:**
    - To set own parameters, use the custom-experiment command or start a bash in the new container:
      ```sh
-     docker run -p 8085:8083 -p 8084:8084 --name hyperf-custom-experiment hyperf/repl custom-experiment --jobs 5 --training-set-size 5
+     docker run -p 8083:8083 -p 8084:8084 --name hyperf-custom-experiment hyperf/repl custom-experiment --jobs 5 --training-set-size 5
      ```
      or
      ```sh
