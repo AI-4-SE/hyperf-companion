@@ -249,16 +249,16 @@ class Evaluation:
                 print(data_df)
                 csv_path = prepend_to_filename("transfer-", self.csv_path)
                 self.store_csvs(csv_path, data_df)
-                plotter = TransferPlotter(csv_path)
-                plotter.plot_errors()
+                # plotter = TransferPlotter(csv_path)
+                # plotter.plot_errors()
 
             if data_list[("multitask")]:
                 data_df = pd.DataFrame(data_list[("multitask")])
                 print(data_df)
                 csv_path = prepend_to_filename("multitask-", self.csv_path)
                 self.store_csvs(csv_path, data_df)
-                plotter = MultitaskPlotter(csv_path)
-                plotter.plot_errors()
+                # plotter = MultitaskPlotter(csv_path)
+                # plotter.plot_errors()
 
     def store_csvs(self, csv_path, data_df):
         data_df.to_csv(csv_path)

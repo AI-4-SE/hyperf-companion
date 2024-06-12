@@ -66,11 +66,6 @@ def get_rep_ids(default_n_reps, custom_num_reps=None, rep_offset=0):
 
 def main():
     mlflow.set_tracking_uri(MLFLOW_URI)
-
-    experiment_class_labels = {
-        "multitask": ExperimentMultitask,
-        "transfer": ExperimentTransfer,
-    }
     parser = argparse.ArgumentParser(description="Script description")
     parser.add_argument(
         "--jobs", type=int, default=None, help="Number of jobs for parallel mode"
@@ -87,13 +82,13 @@ def main():
     parser.add_argument("--debug", action="store_true", help="Enable debug mode")
     parser.add_argument("--plot", action="store_true", help="Enable debug mode")
     parser.add_argument("--store", action="store_true", help="Enable debug mode")
-    parser.add_argument(
-        "--experiments",
-        default=experiment_class_labels.keys(),
-        choices=experiment_class_labels.keys(),
-        nargs="*",
-        help="allows selecting individual experiments",
-    )
+    # parser.add_argument(
+    #     "--experiments",
+    #     default=experiment_class_labels.keys(),
+    #     choices=experiment_class_labels.keys(),
+    #     nargs="*",
+    #     help="allows selecting individual experiments",
+    # )
     parser.add_argument('--training-set-size', type=float,
                         help="Disables the sweep over different training set sizes and uses the given size")
     args = parser.parse_args()
@@ -104,7 +99,7 @@ def main():
     num_reps = args.reps
     rep_offset = args.rep_offset
     training_set_size = args.training_set_size
-    chosen_experiments = [experiment_class_labels[e] for e in args.experiments]
+    chosen_experiments = [ExperimentMultitask]
     print("Preparing experiments", chosen_experiments)
 
     print("pwd", os.getcwd())
@@ -113,94 +108,7 @@ def main():
 
     rep_lbl = "full-run"
     if debug:
-        chosen_model_lbls = []
-        # chosen_model_lbls.extend(["no-pooling-lin"])
-        # chosen_model_lbls.extend(["cpooling-lin"])
-        # chosen_model_lbls.extend(["model_lasso_reg_cpool"])
-        # chosen_model_lbls.extend(["model_lasso_reg_no_pool"])
-        # chosen_model_lbls.extend(["cpooling-rf"])
-        # chosen_model_lbls.extend(["no-pooling-rf"])
-        # chosen_model_lbls.extend(["no-pooling-dummy"])
-
-        # chosen_model_lbls.extend(["no-pooling-mcmc-1model"])
-        # chosen_model_lbls.extend(["cpooling-mcmc-1model"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-robust"])
-        chosen_model_lbls.extend(["partial-pooling-mcmc-robust-adaptive-shrinkage"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-robust-adaptive-shrinkage-pw"])
-
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-robust-pw"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-selfstd"])
-        # chosen_model_lbls.extend(["mcmc-selfstd-const-hyper"])
-
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-extra"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-horseshoe"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-RHS"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-RHS-pw"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-robust-pw"])
-        # chosen_model_lbls.extend(["no-pooling-lin-pw"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-extra-pw"])
-
-        # chosen_model_lbls.extend(["cpooling-mcmc-1model", "partial-pooling-mcmc-extra", "no-pooling-rf"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-extra-pw"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-robust"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-horseshoe-pw"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-selfstd"])
-        # chosen_model_lbls.extend(["partial-pooling-mcmc-extra", "partial-pooling-mcmc-robust", "partial-pooling-mcmc-horseshoe"])
-
-        # number of pairwise interactions > 10N for N>=22
-        # train_sizes = (
-        #     0.125,
-        #     0.25,
-        #     0.375,
-        #     0.5,
-        #     0.675,
-        #     0.75,
-        #     0.9,
-        #     1,
-        #     1.1,
-        #     1.25,
-        #     1.5,
-        #     1.75,
-        #     2,
-        #     2.5,
-        #     3,
-        #     4,
-        # )
-        train_sizes = (
-            # 0.001,
-            # 0.125,
-            # 0.25,
-            0.5,
-            # 0.75,
-            # # 0.9,
-            # 1.0,
-            # # 1.1,
-            # 1.25,
-            # 1.5,
-            # # 1.75,
-            # 2,
-            # 3.0,
-            # 5,
-        )
-
-        n_reps = 1
-        rnds = get_rep_ids(n_reps, num_reps, rep_offset)
-
-        selected_data = (
-            "jump3r",
-            # "H2",
-            # "xz",  # bad results
-            # "x264",  # bad results
-            # "batik",
-            # "dconvert",
-            # "kanzi",
-            # "lrzip",  # bad results
-            # "z3",
-            # "artificial",
-            # "VP9",
-            # "x265",
-        )
-        rep_lbl = "debug-1modelvs partial"
+        pass
     else:
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
         train_sizes = (

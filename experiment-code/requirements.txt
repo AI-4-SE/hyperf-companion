@@ -8,11 +8,9 @@ Markdown
 numpy==1.25.0
 joblib
 streamlit==1.30.0
-pyro-ppl[cpu]
-numpyro[cpu]==0.12.1
-jax[cpu]
-jaxlib[cpu]
+pyro-ppl
 shortuuid==1.0.13
+numpyro==0.12.1
 arviz
 bokeh
 absl-py
