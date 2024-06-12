@@ -13,16 +13,13 @@ We introduce a third approach to this mix: *Bayesian Multi-level models*, called
 
 
 ## Supplementary Material
-
-
-[//]: # (  <summary><h2>Supplementary Material</h2></summary>)
   
-  <details>
-    <summary><h3>Software Systems</h3></summary>
+[//]: # (  <details>)
 
-sdfsdf  
+[//]: # (    <summary><h3>Software Systems</h3></summary>)
 
-  </details>
+[//]: # ()
+[//]: # (  </details>)
   <details>
     <summary><h3>RQ1</h3></summary>
 
