@@ -74,7 +74,7 @@ def run_insights_dashboard(blocking=True):
 
 def run(cmd, blocking=True):
     blocking_str = "BLOCKING" if blocking else "[ASYNC]"
-    print(f"[{blocking_str}] {str(blocking_str)}")
+    print(f"[{blocking_str}] {' '.join(cmd)}")
     if blocking:
         subprocess.run(cmd, cwd=cwd_wluncert)
     else:

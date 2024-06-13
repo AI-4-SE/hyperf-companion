@@ -86,7 +86,6 @@ Example for Z3:
 [//]: # (     - To replicate RQ2 and RQ3, choose `--reps 1 --store --training-set-size 3`, as posterior distributions must be stored, while only models the first random seed `0` were analyzed.)
 
 
-
 <details>
     <summary><h3>Run as Docker (Replication)</h3></summary>
     To run the full experiment via Docker, follow these steps:
@@ -113,9 +112,12 @@ Example for Z3:
     - After the build is complete, run your Docker container with:
       ```sh
       docker run -p 8083:8083 --name hyperf-rq1 hyperf/repl rq1 --reps 5 --jobs 5
+      docker run -it -p 8083:8083 --name hyperf-rq1 hyperf/repl rq1 --reps 5 --jobs 5 
       ```
         - Adjust the number of jobs to your CPU; five repetitions should suffice to see robust trends, but do choose 30
           to replicate the paper's experiment
+    - If you want to detach from the container during the experiment or after, without losing experiment data and the running dashboard, press `Ctr + p` `Ctr + q`
+      - re-attach using your container name: `docker attach hyperf-rq1-v2`
     - When the job is *finished*, explore the Streamlit dashboard at http://localhost:8083. You can change the port by
       replacing the port before the colon, i.e., `OUTERPORT:8083`.
     - To copy the results outside the docker use:
@@ -127,7 +129,7 @@ Example for Z3:
 4. **Run RQ2 and RQ3 with the Docker Container:**
     - After the build is complete, run your Docker container with:
       ```sh
-      docker run -p 8084:8084 --name hyperf-rq2-and-3 hyperf/repl rq23 --jobs 5
+      docker run -it -p 8084:8084 --name hyperf-rq2-and-3 hyperf/repl rq23 --jobs 5
       ```
         - Adjust the number of jobs to your hardware; calling the rq23 command automatically only runs 1 repetition
 
@@ -142,7 +144,7 @@ Example for Z3:
 4. **Run custom experiments with the Docker Container:**
     - To set own parameters, use the custom-experiment command or start a bash in the new container:
       ```sh
-      docker run -p 8083:8083 -p 8084:8084 --name hyperf-custom-experiment hyperf/repl custom-experiment --jobs 5 --training-set-size 5
+      docker run -it -p 8083:8083 -p 8084:8084 --name hyperf-custom-experiment hyperf/repl custom-experiment --jobs 5 --training-set-size 5
       ```
       or
       ```sh
