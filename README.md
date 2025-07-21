@@ -19,9 +19,7 @@ For this purpose, HyPerf employs a hierarchical structure: The upper level captu
 
 With HyPerf, we aim at *balancing accuracy and efficiency*, achieving robust performance predictions with significantly fewer training samples. Unlike the state of the art, HyPerf is able to *identify a minimal set of settings* that captures essential performance variations, so that developers can approximate whether all setting-variant influences have been accounted for.
 
-\begin{icserev}
-Empirical evaluations
-\end{icserev} on ten real-world software systems across up to 35 workloads demonstrates that HyPerf matches or outperforms state-of-the-art approaches while requiring fewer measurements. Notably, HyPerf is indeed capable of \emph{interpretable performance reasoning} and can identify minimal workload subsets that capture essential performance variations.
+Empirical evaluations on ten real-world software systems across up to 35 workloads demonstrates that HyPerf matches or outperforms state-of-the-art approaches while requiring fewer measurements. Notably, HyPerf is indeed capable of *interpretable performance reasoning* and can identify minimal workload subsets that capture essential performance variations.
 
 
 ## Supplementary Material
