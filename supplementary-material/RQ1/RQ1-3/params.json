@@ -1,0 +1,10 @@
+{
+    "params.rnd": 0,
+    "params.model": "partial-pooling-mcmc-robust-adaptive-shrinkage",
+    "params.software-system": "tuxkconfig",
+    "params.exp_id": "uncertainty-learning-2025-07-16_00-35-35-debug-1modelvs partial",
+    "params.train_size": 123,
+    "params.relative_train_size": 0.01,
+    "params.pooling_cat": "PARTIAL_POOLING",
+    "params.experiment-type": "multitask"
+}

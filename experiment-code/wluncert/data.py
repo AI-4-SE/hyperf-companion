@@ -5,7 +5,6 @@ from typing import List
 
 import pandas as pd
 import scipy
-from pycosa import util
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import (
@@ -15,7 +14,7 @@ from sklearn.preprocessing import (
     MaxAbsScaler,
 )
 
-from jax import numpy as jnp
+from utils import remove_multicollinearity
 
 
 def has_multiple_columns(data):
@@ -106,24 +105,53 @@ class SingleEnvData:
         n_train_samples_abs=None,
         n_train_samples_rel_opt_num=None,
         rnd=0,
-        n_test_samples_rel_opt_num=None,
+        max_train_samples_rel_opt_num=None,
+        max_test_samples_abs=10000,
     ):
+        """Return a train/test split.
+
+        ``max_train_samples_rel_opt_num`` defines the relative size of the
+        largest training subset used for deriving smaller training sets.
+        The test set consists of all samples
+        that are **not** part of the largest training subset determined by this
+        parameter. Smaller training sets are sampled from that largest
+        training subset so that every training set is contained in it.
+
+        ``max_test_samples_abs`` can be used to further subsample the resulting
+        test set to at most this many rows. Sampling respects ``rnd`` so it is
+        deterministic for a given seed.
+        """
+
         n_opts = self.get_n_options()
         absolute_train_size = self.map_real_to_abs_number(
             n_opts, n_train_samples_abs, n_train_samples_rel_opt_num
         )
-        # print("Splitting train set with abs samples of", absolute_train_size)
-        # absolute_train_size = min(absolute_train_size, len(self.df))
+
+        if max_train_samples_rel_opt_num:
+            absolute_max_train_size = self.map_real_to_abs_number(
+                n_opts, None, max_train_samples_rel_opt_num
+            )
+            df_largest_train, df_test = train_test_split(
+                self.df, train_size=absolute_max_train_size, random_state=rnd
+            )
+            if absolute_train_size == absolute_max_train_size:
+                df_train = df_largest_train
+            else:
+                df_train, _ = train_test_split(
+                    df_largest_train,
+                    train_size=absolute_train_size,
+                    random_state=rnd,
+                )
+        else:
         df_train, df_test = train_test_split(
             self.df, train_size=absolute_train_size, random_state=rnd
         )
-        if n_test_samples_rel_opt_num:
-            absolute_test_size = self.map_real_to_abs_number(
-                n_opts, None, n_test_samples_rel_opt_num
+
+        if max_test_samples_abs is not None and len(df_test) > max_test_samples_abs:
+            df_test, _ = train_test_split(
+                df_test, train_size=max_test_samples_abs, random_state=rnd
             )
-            _, df_test = train_test_split(
-                self.df, train_size=absolute_test_size, random_state=rnd
-            )
+
         train_data = SingleEnvData(df_train, self.env_col_name, self.nfps)
         test_data = SingleEnvData(df_test, self.env_col_name, self.nfps)
 
@@ -190,9 +218,11 @@ class SingleEnvDataNormalized(SingleEnvData):
         for nfp_name in self.nfps:
             y = np.atleast_2d(self.get_y(nfp_name)).T
             if scaler:
-                y_scaled = scaler[nfp_name].transform(y)
-            y_scaler = StandardScaler()
-            y_scaled = y_scaler.fit_transform(y)
+                y_scaler = scaler[nfp_name]
+            else:
+                y_scaler = StandardScaler()
+                y_scaler.fit(y)
+            y_scaled = y_scaler.transform(y)
             self.df[nfp_name] = y_scaled.ravel()
             self.scaler_y[nfp_name] = y_scaler
 
@@ -289,15 +319,26 @@ class WorkloadTrainingDataSet:
 
 
 class DataLoaderStandard:
-    def __init__(self, base_path):
+    def __init__(self, base_path, sep=None):
         super().__init__()
         self.base_path = base_path
+        self.sep = sep
 
     def get_standard_CSV(self):
-        sys_df = pd.read_csv(self.base_path)
+        if str(self.base_path).endswith(".parquet"):
+            print(f"start reading parquet {self.base_path}", flush=True)
+            sys_df = pd.read_parquet(self.base_path, engine="pyarrow")
+            print(f"end reading parquet shape={sys_df.shape}", flush=True)
+        else:
+            print(f"start reading csv {self.base_path}", flush=True)
+            sys_df = pd.read_csv(self.base_path, sep=self.sep)
+            print(f"csv loaded shape={sys_df.shape}", flush=True)
         df_no_multicollinearity = remove_multicollinearity(sys_df)
-        cleared_sys_df = copy.deepcopy(df_no_multicollinearity)
-        return cleared_sys_df
+        print(
+            f"data after removing multicollinearity shape={df_no_multicollinearity.shape}",
+            flush=True,
+        )
+        return df_no_multicollinearity
 
     def get_df(self):
         df = self.get_standard_CSV()
@@ -325,7 +366,7 @@ class DataLoaderDashboardData:
         self.nfps = [c for c in measurement_df.columns if c not in col_names_to_exclude]
 
         df_no_multicollinearity = remove_multicollinearity(joined_df)
-        self.cleared_sys_df = copy.deepcopy(df_no_multicollinearity)
+        self.cleared_sys_df = df_no_multicollinearity
         return self.cleared_sys_df
 
     def get_standard_CSV(self):
@@ -675,8 +716,38 @@ class DataAdapterArtificial(DataAdapter):
         return noisy_df
 
 
-def remove_multicollinearity(df):
-    return util.remove_multicollinearity(df)
+class DataAdapterTuxKconfig(DataAdapter):
+    """Adapter for the TuxKConfig dataset aggregated from OpenML"""
+
+    def __init__(self, data_loader: DataLoaderStandard):
+        self.environment_col_name = "version"
+        self.nfps = ["binary-size"]
+        self.environment_lables = None
+        super().__init__(data_loader, self.environment_col_name)
+
+    def get_environment_col_name(self):
+        return self.environment_col_name
+
+    def get_environment_lables(self):
+        return list(self.environment_lables)
+
+    def get_nfps(self):
+        return self.nfps
+
+    def get_transformed_df(
+        self,
+        cleared_sys_df,
+    ):
+        cleared_sys_df = self.factorize_workload_col(cleared_sys_df)
+        all_cols = cleared_sys_df.columns
+        middle_cols = [self.environment_col_name]
+        options = set(all_cols) - {*self.nfps, *middle_cols}
+        cleared_sys_df = cleared_sys_df[
+            [*options, self.environment_col_name, *self.nfps]
+        ]
+        # replace NaN values with 0 (OpenML data may contain missing entries)
+        cleared_sys_df = cleared_sys_df.fillna(0)
+        return cleared_sys_df
 
 
 class Preprocessing(ABC):

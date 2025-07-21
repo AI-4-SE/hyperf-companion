@@ -178,105 +178,138 @@ class Replication:
         self.rnds = rnds if rnds is not None else [0]
         self.result = None
         self.do_transfer_task = do_transfer_task
+        self.max_test_samples_abs = max_test_samples_abs
         self.parent_run_id = None
         self.experiment_name = f"uncertainty-learning-{self.replication_lbl}"
 
-    def run(self):
-        # if not mlflow.create_experiment(experiment_name):
-        # mlflow.set_tracking_uri(
-        #
-        # )
-        # mlflow.set_experiment(experiment_name=self.experiment_name)
+    def release_resources(self):
+        """Release large objects to free memory."""
+        self.data_providers = {}
+        self.models = {}
+        gc.collect()
 
+    def _uses_tux_data(self) -> bool:
+        """Return True if any selected dataset is the TuxKconfig dataset."""
+        return any("tuxkconfig" in lbl for lbl in self.data_providers)
+
+   def provision_experiment(self, args):
+        model_lbl, model_proto, data_lbl, data_set, train_size, rnd = args
+        print(
+            f"provisioning model={model_lbl} data={data_lbl} train_size={train_size} rnd={rnd}",
+            flush=True,
+        )
+        max_train_size = max(self.train_sizes_relative_to_option_number)
+        data_per_env: List[SingleEnvData] = data_set.get_workloads_data()
+        train_list = []
+        test_list = []
+
+        rng = np.random.default_rng(rnd)
+        seeds = [
+            rng.integers(0, 2**30, dtype=np.uint32) for _ in range(len(data_per_env))
+        ]
+
+        for i, env_data in zip(seeds, data_per_env):
+            new_seed_for_env = i
+            split = env_data.get_split(
+                rnd=new_seed_for_env,
+                n_train_samples_rel_opt_num=train_size,
+                max_train_samples_rel_opt_num=max_train_size,
+                max_test_samples_abs=self.max_test_samples_abs,
+            )
+            train_data = split.train_data
+            train_list.append(train_data)
+            test_list.append(split.test_data)
+
+        abs_train_size = len(train_list[0])
+        tasks = []
+
+        for task_class in self.experiment_classes:
+            model_proto_for_env = copy.deepcopy(model_proto)
+            model_proto_for_env.set_envs(data_set)
+            pooling_cat = model_proto_for_env.get_pooling_cat()
+            new_task = task_class(
+                model_lbl,
+                model_proto_for_env,
+                data_lbl,
+                train_list,
+                test_list,
+                train_size=abs_train_size,
+                pooling_cat=pooling_cat,
+                rel_train_size=train_size,
+                exp_id=self.experiment_name,
+                rnd=rnd,
+            )
+            tasks.append(new_task)
+
+        print(
+            f"finished provisioning {len(tasks)} tasks for model={model_lbl} data={data_lbl}",
+            flush=True,
+        )
+
+        return tasks
+
+    def run(self):
         mlflow.set_tracking_uri(MLFLOW_URI)
         mlflow.set_experiment(experiment_name=EXPERIMENT_NAME)
         run_name = self.experiment_name.replace(" ", "")
         with mlflow.start_run(run_name=run_name) as run:
             self.parent_run_id = run.info.run_id
             print(self.parent_run_id)
-        time.sleep(0.2)
-        # mlflow.end_run()
 
-        tasks = {key: [] for key in self.experiment_classes}
-        for model_lbl, model_proto in self.models.items():
-            for data_lbl, data_set in self.data_providers.items():
-                max_train_size = max(self.train_sizes_relative_to_option_number)
-                for train_size in self.train_sizes_relative_to_option_number:
-                    for rnd in self.rnds:
-                        data_per_env: List[
-                            SingleEnvData
-                        ] = data_set.get_workloads_data()
-                        train_list = []
-                        test_list = []
+        # Prepare arguments for parallel execution
+        args_list = [
+            (model_lbl, model_proto, data_lbl, data_set, train_size, rnd)
+            for model_lbl, model_proto in self.models.items()
+            for data_lbl, data_set in self.data_providers.items()
+            for train_size in self.train_sizes_relative_to_option_number
+            for rnd in self.rnds
+        ]
+        print(f"Starting to provision {len(args_list)} experiments", flush=True)
 
-                        rng = np.random.default_rng(rnd)
-                        seeds = [
-                            rng.integers(0, 2**30, dtype=np.uint32)
-                            for r in range(len(data_per_env))
-                        ]
-                        for i, env_data in zip(seeds, data_per_env):
-                            # new_seed_for_env = rng.integers(0, 2**30, dtype=np.uint32)
-                            new_seed_for_env = i
-                            split = env_data.get_split(
-                                rnd=new_seed_for_env,
-                                n_train_samples_rel_opt_num=train_size,
-                                n_test_samples_rel_opt_num=max_train_size,
-                            )
-                            train_data = split.train_data
-                            train_list.append(train_data)
-                            test_list.append(env_data)
-                        abs_train_size = len(train_list[0])
-                        for task_class in self.experiment_classes:
-                            model_proto_for_env = copy.deepcopy(model_proto)
-                            model_proto_for_env.set_envs(data_set)
-                            pooling_cat = model_proto_for_env.get_pooling_cat()
-                            new_task = task_class(
-                                model_lbl,
-                                model_proto_for_env,
-                                data_lbl,
-                                train_list,
-                                test_list,
-                                train_size=abs_train_size,
-                                pooling_cat=pooling_cat,
-                                rel_train_size=train_size,
-                                exp_id=self.experiment_name,
-                                rnd=rnd,
-                            )
-                            tasks[task_class].append(new_task)
+        if self._uses_tux_data():
+            for args in tqdm(args_list):
+                task_list = self.provision_experiment(args)
+                random.shuffle(task_list)
+                for task in task_list:
+                    self.handle_task(task)
+                    del task
+                    gc.collect()
+        else:
+            tasks = {key: [] for key in self.experiment_classes}
+            with parallel_backend("multiprocessing", n_jobs=-4):
+                results = Parallel(verbose=1)(
+                    delayed(self.provision_experiment)(args) for args in args_list
+                )
+            for task_list in results:
+                for task in task_list:
+                    tasks[type(task)].append(task)
+            del results
 
-        print("provisioned experiments", flush=True)
+            print("Provisioned experiments", flush=True)
 
         random.seed(self.rnds[0])
-        # results = {key: [] for key in tasks}
-        # scores_list = []
-        # metas_list = []
-        # result_dict = {}
         for task_type in tasks:
             random.shuffle(tasks[task_type])
             print(f"Planning {self.n_jobs} jobs")
 
-            if self.n_jobs:
-                Parallel(n_jobs=self.n_jobs)(
+                task_kwargs = {
+                    "n_jobs": self.n_jobs,
+                    "prefer": "threads",
+                    "verbose": 10,
+                }
+                Parallel(**task_kwargs)(
                     delayed(self.handle_task)(task) for task in tqdm(tasks[task_type])
                 )
-            else:
-                self.progress_bar = tqdm(
-                    total=len(tasks),
-                    desc="Running multitask learning tasks",
-                    unit="task",
-                )
-                for type_wise_tasks in tasks[task_type]:
-                    self.handle_task(type_wise_tasks)
-                    # self.progress_bar.update(1)
-                self.progress_bar.close()
+
+            tasks.clear()
+            gc.collect()
+
         print(self.parent_run_id)
         return self.parent_run_id
 
-    # def handle_task(self, progress_bar, task):
     def handle_task(self, task: ExperimentTask):
         mlflow.set_tracking_uri(MLFLOW_URI)
         mlflow.set_experiment(experiment_name=EXPERIMENT_NAME)
-        # mlflow.set_experiment(experiment_name=self.experiment_name)
         run_name = task.get_id()
         with mlflow.start_run(
             run_id=self.parent_run_id  # self.experiment_name.replace(" ", ""),
@@ -287,3 +320,4 @@ class Replication:
                     task.run()
         del task.model
         del task
+        gc.collect()

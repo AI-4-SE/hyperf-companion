@@ -7,25 +7,22 @@ Variability of Configurable Software Systems"
 
 PDF: will be linked later
 
-## ABSTRACT</h3>
 
-Configuring a software system for a specific environment and use case is challenging. Beyond functionality,
-configuration options may have a substantial influence on performance. Due to combinatorics, it is often unclear in
-practice *how* to configure a system to yield certain performance guarantees. Multiple factors, such as varying the
-workload, may affect the influence of configuration options on performance substantially as recent studies have shown.
-There are two principal approaches in the literature to address this *multi-factor variance*: (1) measure a subset of
-configurations for varying environments to learn a single model or (2) learn a distinct model for every single
-environment of the system.
+## ABSTRACT
 
-We introduce a third approach to this mix: *Bayesian Multi-level models*, called HyPerf. The key idea of HyPerf is to
-explicitly model the uncertainty in performance influences of configuration options arising from the sparsity of
-training data considering the vast space of possible environments and measurement noise. Capturing common patterns in
-so-called *hyper priors* in a superior model level, HyPerf generalizes performance influences across multiple factors.
-Through a large-scale empirical analysis, we assess the prediction accuracy of all three approaches on 10 real-world
-subject systems across up to 35 environments. Our findings demonstrate HyPerf’s competitive predictive performance among
-interpretable models. Further variance analysis using HyPerf reveals the prevalence of workload dependency of option's
-performance influences. We show that, for most software systems, several workloads are necessary to capture most of the
-intra-environmental variance.
+Tuning a software system’s configuration is essential to meet performance requirements. However, performance is not only influenced by configuration options, but also by external factors such as the workload. 
+Hence, tuning requires understanding how a specific *setting* of external factors (e.g., a specific workload) in combination with the system configuration influences performance. However, current performance modeling approaches usually do not incorporate external factors, for good reasons:
+Training a separate model per setting is costly and is unlikely to generalize, whereas a single model trained on multiple settings fails to capture variations that are *specific to a certain setting*.
+
+To address this shortcoming, we propose HyPerf, a *Bayesian multi-level performance modeling approach* that systematically distinguishes between *setting-invariant* and *setting-variant* influences, that is, influences that remain consistent across settings versus those that exhibit substantial variation.
+For this purpose, HyPerf employs a hierarchical structure: The upper level captures general performance trends across multiple settings (e.g., across different workloads), while the lower level refines these estimates with setting-specific deviations (e.g., workload-specific performance variations).
+
+With HyPerf, we aim at *balancing accuracy and efficiency*, achieving robust performance predictions with significantly fewer training samples. Unlike the state of the art, HyPerf is able to *identify a minimal set of settings* that captures essential performance variations, so that developers can approximate whether all setting-variant influences have been accounted for.
+
+\begin{icserev}
+Empirical evaluations
+\end{icserev} on ten real-world software systems across up to 35 workloads demonstrates that HyPerf matches or outperforms state-of-the-art approaches while requiring fewer measurements. Notably, HyPerf is indeed capable of \emph{interpretable performance reasoning} and can identify minimal workload subsets that capture essential performance variations.
+
 
 ## Supplementary Material
 
@@ -39,9 +36,11 @@ intra-environmental variance.
   <details>
     <summary><h3>RQ1</h3></summary>
 
-[![pMAPE plot](supplementary-material/RQ1/rq1-results.png)](supplementary-material/RQ1/rq1-results.pdf)
+[![pMAPE plot](supplementary-material/RQ1/RQ1-1/rq1-results.png)](supplementary-material/RQ1/RQ1-1/rq1-results.pdf)
 
 You can view the pMAPE values in [the respective sub-folder](supplementary-material/RQ1/).
+We also provide detailed training results for the TuxKConfig dataset in the sub-folder for [RQ1.3](supplementary-material/RQ1/RQ1-3)
+**In the anonymized repository, please use the file tree on the left to navigate, because links to folders do not work.**
 
   </details>
   <details>
@@ -53,6 +52,9 @@ You can view the pMAPE values in [the respective sub-folder](supplementary-mater
 Extending Figure 3 in the paper, you can compare all general influences against their workload-specific influences by
 navigating [the respective sub-folder](supplementary-material/RQ2).
 
+**In the anonymized repository, please use the file tree on the left to navigate, because links to folders do not work.**
+
+
   </details>
   <details>
     <summary><h3>RQ3</h3></summary>
@@ -60,9 +62,13 @@ navigating [the respective sub-folder](supplementary-material/RQ2).
 
 Extending Figure 5 in the paper, you can view all representation matrices for all options by
 navigating [the respective "representation-matrices" subfolder for each software system](supplementary-material/RQ3).
+**In the anonymized repository, please use the file tree on the left to navigate, because links to folders do not work.**
+
 
 Extending Figure 6 in the paper, you can view all representative set building protocols and plots by
 navigating [the root subfolders for each software system](supplementary-material/RQ3).
+**In the anonymized repository, please use the file tree on the left to navigate, because links to folders do not work.**
+
 
 Example for Z3:
 

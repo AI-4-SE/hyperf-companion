@@ -1,6 +1,22 @@
+import sys
+
+print(
+    sys.version
+)  # Full version string (e.g., '3.11.4 (main, Jun  7 2023, 12:33:22) [Clang 14.0.0]')
+
+print(
+    sys.version_info
+)  # Version tuple (e.g., sys.version_info(major=3, minor=11, micro=4, releaselevel='final', serial=0))
+
+
 import numpyro
+import os
 from analysis import Analysis
 import matplotlib
+
+from deepperf import DeepPerfModel
+from dal import DaLRegressor
+
 
 # must be run before any JAX imports
 numpyro.set_host_device_count(50)
@@ -13,7 +29,9 @@ from experiment import (
     MLFLOW_URI,
     EXPERIMENT_NAME,
 )
-import os
+
+
+print(os.environ)
 import localflow as mlflow
 from data import (
     DataLoaderStandard,
@@ -33,6 +51,7 @@ from data import (
     DataAdapterFastdownward,
     DataAdapterArtificial,
     DataAdapterVP9,
+    DataAdapterTuxKconfig,
 )
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression, Lasso
@@ -48,7 +67,8 @@ from models import (
     MCMCPartialSelfStandardizing,
     MCMCPartialRobustLassoAdaptiveShrinkage,
     MCMCPartialSelfStandardizingConstInfl,
-    MCMCRHS,LassoGridSearchCV
+    MCMCRHS,
+    LassoGridSearchCV,
 )
 import mlfloweval
 
@@ -89,8 +109,11 @@ def main():
     #     nargs="*",
     #     help="allows selecting individual experiments",
     # )
-    parser.add_argument('--training-set-size', type=float,
-                        help="Disables the sweep over different training set sizes and uses the given size")
+    parser.add_argument(
+        "--training-set-size",
+        type=float,
+        help="Disables the sweep over different training set sizes and uses the given size",
+    )
     args = parser.parse_args()
     n_jobs = args.jobs
     debug = args.debug
@@ -110,7 +133,7 @@ def main():
     if debug:
         pass
     else:
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+        os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
         train_sizes = (
             0.125,
             0.25,
@@ -137,13 +160,10 @@ def main():
             "H2",
         )
         if training_set_size is not None:
-            train_sizes = (
-                training_set_size,
-            )
+            train_sizes = (training_set_size,)
         chosen_model_lbls = []
 
-
-        #FINALS
+        # FINALS
         chosen_model_lbls.extend(["no-pooling-mcmc-1model"])
         chosen_model_lbls.extend(["cpooling-mcmc-1model"])
         chosen_model_lbls.extend(["partial-pooling-mcmc-robust-adaptive-shrinkage"])
@@ -155,7 +175,6 @@ def main():
 
         chosen_model_lbls.extend(["model_lassocv_reg_no_pool"])
         chosen_model_lbls.extend(["model_lassocv_reg_cpool"])
-
 
     models = {k: v for k, v in models.items() if k in chosen_model_lbls}
 
@@ -176,6 +195,7 @@ def main():
         rnds,
         n_jobs=n_jobs,
         replication_lbl=rep_lbl,
+        max_test_samples_abs=10000,
     )
     run_id = rep.run()
 
@@ -184,7 +204,6 @@ def main():
     print("running analysis")
     eval = mlfloweval.Evaluation(run_id, MLFLOW_URI, EXPERIMENT_NAME)
     eval.run()
-
 
 
 def get_all_models(debug, n_jobs, plot, do_store=False):
@@ -203,10 +222,12 @@ def get_all_models(debug, n_jobs, plot, do_store=False):
         "num_chains": mcmc_num_chains,
         "progress_bar": progress_bar,
     }
-    rf_proto = RandomForestRegressor()
+    rf_proto = RandomForestRegressor(n_jobs=3)
     model_rf = NoPoolingEnvModel(rf_proto, preprocessings=[Standardizer()])
 
-    complete_pooling_rf = CompletePoolingEnvModel(rf_proto, preprocessings=[Standardizer()])
+    complete_pooling_rf = CompletePoolingEnvModel(
+        rf_proto, preprocessings=[Standardizer()]
+    )
     lin_reg_proto = LinearRegression()
     model_lin_reg = NoPoolingEnvModel(lin_reg_proto, preprocessings=[Standardizer()])
     model_lin_reg_cpool = CompletePoolingEnvModel(
@@ -240,8 +261,19 @@ def get_all_models(debug, n_jobs, plot, do_store=False):
         lassocv_proto, preprocessings=[Standardizer()]
     )
 
+    deep_perf_proto = DeepPerfModel()
+    model_deeperf_no_pooling = NoPoolingEnvModel(
+        deep_perf_proto, preprocessings=[Standardizer()]
+    )
+    model_deeperf_cpooling = CompletePoolingEnvModel(
+        deep_perf_proto, preprocessings=[Standardizer()]
+    )
 
-
+    dal_proto = DaLRegressor()
+    model_dal_no_pooling = NoPoolingEnvModel(dal_proto, preprocessings=[Standardizer()])
+    model_dal_cpooling = CompletePoolingEnvModel(
+        dal_proto, preprocessings=[Standardizer()]
+    )
 
     # model_lin_reg_poly = Poly
     dummy_proto = DummyRegressor()
@@ -402,6 +434,10 @@ def get_all_models(debug, n_jobs, plot, do_store=False):
         "model_lasso_reg_no_pool": model_lasso_reg_no_pool,
         "model_lassocv_reg_no_pool": model_lassocv_reg_no_pool,
         "model_lassocv_reg_cpool": model_lassocv_reg_cpool,
+        "model_deeperf_no_pooling": model_deeperf_no_pooling,
+        "model_deeperf_cpooling": model_deeperf_cpooling,
+        "model_dal_no_pooling": model_dal_no_pooling,
+        "model_dal_cpooling": model_dal_cpooling,
     }
     return models
 
@@ -420,6 +456,7 @@ def get_datasets(train_data_folder=None, dataset_lbls=None):
     lbl_fastdownward = "fastdownward"
     lbl_artificial = "artificial"
     lbl_VP9 = "VP9"
+    lbl_tuxkconfig = "tuxkconfig"
     all_lbls = [
         lbl_jump_r,
         lbl_H2,
@@ -434,6 +471,7 @@ def get_datasets(train_data_folder=None, dataset_lbls=None):
         lbl_fastdownward,
         lbl_artificial,
         lbl_VP9,
+        lbl_tuxkconfig,
     ]
     dataset_lbls = dataset_lbls or all_lbls
 
@@ -525,7 +563,7 @@ def get_datasets(train_data_folder=None, dataset_lbls=None):
     if lbl_VP9 in dataset_lbls:
         path_vp9 = os.path.join(
             train_data_folder,
-            "performance-across-workloads-and-evolution/vp9/measurements_1.13.0-t_wise.csv",
+            "measurements_VP9_1.13.0-t_wise.csv",
         )
         vp9_data_raw = DataLoaderStandard(path_vp9)
         data_vp9 = DataAdapterVP9(vp9_data_raw)
@@ -535,12 +573,24 @@ def get_datasets(train_data_folder=None, dataset_lbls=None):
     if lbl_x265 in dataset_lbls:
         path_x265 = os.path.join(
             train_data_folder,
-            "performance-across-workloads-and-evolution/x265/measurements_3.5-t_wise.csv",
+            "measurements_x265_3.5-t_wise.csv",
         )
         x265_data_raw = DataLoaderStandard(path_x265)
         data_x265 = DataAdapterVP9(x265_data_raw)
         x265_wl_data: WorkloadTrainingDataSet = data_x265.get_wl_data()
         data_providers[lbl_x265] = x265_wl_data
+
+    if lbl_tuxkconfig in dataset_lbls:
+        path_tuxkc = os.path.join(
+            train_data_folder,
+            "tuxkconfig_datasets",
+            "tuxkconfig_merged.parquet",
+        )
+
+        tuxkc_data_raw = DataLoaderStandard(path_tuxkc)
+        data_tuxkc = DataAdapterTuxKconfig(tuxkc_data_raw)
+        tuxkc_wl_data: WorkloadTrainingDataSet = data_tuxkc.get_wl_data()
+        data_providers[lbl_tuxkconfig] = tuxkc_wl_data
 
     print("loaded data")
     return data_providers

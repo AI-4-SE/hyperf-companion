@@ -1,0 +1,23 @@
+{
+    "metrics.mape_ci_overall": 3524.9520050274955,
+    "metrics.relative_ci_width_overall": 5.038489314195315,
+    "metrics.clibration_diff": 0.7296964285714286,
+    "metrics.pmape_ci_overall": 4271.04768319031,
+    "metrics.mape_overall": 4697.737921238838,
+    "metrics.R2_overall": -1068.7604054729986,
+    "metrics.p_loo": 460.8686966896057,
+    "metrics.n_rvs": 111322,
+    "metrics.original_total_influences": 86583,
+    "metrics.relative_DOF": 0.00532285433271665,
+    "metrics.DOF_shrinkage": 0.9946771456672834,
+    "metrics.elpd_loo_se": 21.203308146619097,
+    "metrics.elpd_loo": -2070.2556314468384,
+    "metrics.test_set_log-likelihood": -271.2247009277344,
+    "metrics.warning": true,
+    "metrics.log_scale": true,
+    "metrics.pred_time_cost": 107.89661931991577,
+    "metrics.fitting_time_cost": 17841.717139720917,
+    "metrics.preproc-fittin_time_cost": 1.5360147953033447,
+    "metrics.preproc-pred-_time_cost": 7.47589635848999,
+    "metrics.max_memory_mb": 70629.8515625
+}

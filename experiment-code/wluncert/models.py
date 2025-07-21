@@ -5,6 +5,9 @@ import uuid
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 import time
+
+import os
+
 import numpyro
 
 # numpyro.enable_x64()
@@ -26,6 +29,7 @@ from sklearn.linear_model import Lasso
 from sklearn.preprocessing import PolynomialFeatures
 
 import numpy as np
+import gc
 
 from numpyro.handlers import reparam
 from numpyro.infer.reparam import LocScaleReparam
@@ -41,6 +45,8 @@ from data import SingleEnvData, WorkloadTrainingDataSet, Preprocessing
 # from wluncert.analysis import ModelEvaluation
 import localflow as mlflow
 from numpyro.distributions import constraints
+from tqdm import tqdm
+
 
 NO_POOLING = "NO_POOLING"
 COMPLETE_POOLING = "COMPLETE_POOLING"
@@ -218,7 +224,10 @@ class NumPyroRegressor(ExperimentationModelBase):
         # pred = npPredictive(self.model, posterior_samples=posterior_samples, num_samples=n_samples, parallel=True)
         # numpyro currently ignores num_samples if different from number of posterior samples
         pred = npPredictive(
-            self.model, posterior_samples=posterior_samples, parallel=True,
+            self.model,
+            posterior_samples=posterior_samples,
+            # parallel=True,
+            parallel=False,
         )
         rng_key_ = random.PRNGKey(0)
         y_pred = pred(rng_key_, *model_args, None)["observations"]
@@ -294,7 +303,9 @@ class NumPyroRegressor(ExperimentationModelBase):
                     "and shape",
                     shape,
                 )
-        original_total_influences = len(self.env_lbls) + len(self.env_lbls) * len(self.feature_names)
+        original_total_influences = len(self.env_lbls) + len(self.env_lbls) * len(
+            self.feature_names
+        )
         p_loo = loo_data.p_loo
         relative_DOF = p_loo / original_total_influences
         DOF_shrinkage = (original_total_influences - p_loo) / original_total_influences
@@ -313,6 +324,8 @@ class NumPyroRegressor(ExperimentationModelBase):
         return d
 
     def evaluate(self, eval, test_list=None):
+        if self.persist_arviz:
+            self.persist_arviz_data()
         eval.prepare_sample_modes()
         eval.add_mape()
         eval.add_R2()
@@ -322,8 +335,7 @@ class NumPyroRegressor(ExperimentationModelBase):
         bayesian_metrics = self.get_bayes_eval_dict(test_list)
         model_metrics = {**bayesian_metrics, **cost_df}
         eval.add_custom_model_dict(model_metrics)
-        if self.persist_arviz:
-            self.persist_arviz_data()
+
         if self.plot:
             eval.add_custom_pred_eval(self.debug_predictions)
         return eval
@@ -427,6 +439,7 @@ class NumPyroRegressor(ExperimentationModelBase):
     def persist_arviz_data(self):
         print("saving now!")
         az_data = self.get_arviz_data()
+        os.makedirs("tmp", exist_ok=True)
         tmp_file = f"tmp/arviz_data-{uuid.uuid4()}.netcdf"
         az_data.to_netcdf(filename=tmp_file)
         mlflow_log_artifact(tmp_file)
@@ -1855,13 +1868,13 @@ class CompletePoolingEnvModel(ExperimentationModelBase):
         return eval
 
 
-
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV, LeaveOneOut
 from sklearn.linear_model import Lasso
 
+
 class LassoGridSearchCV(BaseEstimator):
-    def __init__(self, alphas=None, cv=5, scoring='neg_mean_squared_error'):
+    def __init__(self, alphas=None, cv=5, scoring="neg_mean_squared_error"):
         self.alphas = alphas if alphas is not None else [0.001, 0.01, 0.1, 0.5, 1, 10]
         self.cv = cv
         self.scoring = scoring
@@ -1871,13 +1884,13 @@ class LassoGridSearchCV(BaseEstimator):
     def fit(self, X, y):
         # Check the number of samples
         if len(X) <= 3:
-            self.best_estimator_ = Lasso(0.5).fit(X,y)
+            self.best_estimator_ = Lasso(0.5).fit(X, y)
         else:
             # Use standard 5-fold cross-validation
             cv = 3
 
             # Define the hyperparameter grid
-            param_grid = {'alpha': self.alphas}
+            param_grid = {"alpha": self.alphas}
 
             # Create the Lasso grid search
             grid_search = GridSearchCV(Lasso(), param_grid, cv=cv, scoring=self.scoring)
