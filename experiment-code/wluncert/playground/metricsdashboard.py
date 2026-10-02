@@ -22,8 +22,19 @@ pdf_label = "PDF download"
 
 
 def get_subfolders(parent_folder):
+    if not os.path.isdir(parent_folder):
+        st.error(f"Folder not found: {parent_folder}")
+        return []
     subfolders = [f.path for f in os.scandir(parent_folder) if f.is_dir()]
     return subfolders
+
+
+def get_default_data_string(parent):
+    # result folders start with a yymmdd-HH-MM-SS time stamp: preselect the newest
+    if not os.path.isdir(parent):
+        return None
+    names = sorted(f.name for f in os.scandir(parent) if f.is_dir())
+    return names[-1] if names else None
 
 
 bayes_palette = ["#47AEED", "#398CBF", "#2F729C"]
@@ -268,7 +279,7 @@ def main():
         st.write("## Folder Selection")
         parent_folder = st.text_input(
             "Enter the path of the parent folder",
-            value="/home/jdorn/results/localflow/jdorn-multilevel-eval/",
+            value="./results/localflow/multilevel-eval/",
         )
         if parent_folder:
             subfolders = get_subfolders(parent_folder)
@@ -278,18 +289,7 @@ def main():
             selected_subfolders = st.multiselect(
                 "Select Subfolders",
                 folder_names,
-                # default=["240316-20-16-41-aggregation-bWn627g4jN",
-                #          "240317-14-51-05-aggregation-dNPobw6xky",
-                #          "240318-14-27-26-aggregation-WLFgXnWyqc",
-                #          "240319-11-56-40-aggregation-gn5W8tJhaY"],
-                default=[
-                    # "240321-19-59-19-aggregation-bTLYxz3uFg", # old bayesian multitask
-                    #  # "240319-22-38-13-aggregation-dwnJojszkX", # new lasso grid
-                    #  "240322-13-08-04-aggregation-NKUie5gttU", # 0.9 CI
-                    "240530-04-25-16-aggregation-fufenzJcNa",
-                    # "240530-16-44-27-aggregation-kmTX5kus7v",
-                    "240530-18-50-45-aggregation-5k3mM6CkV4",
-                ],
+                default=get_default_data_string(parent_folder),
             )
 
             if (
