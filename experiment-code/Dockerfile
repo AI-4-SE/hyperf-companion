@@ -37,6 +37,9 @@ RUN python3.9 -m pip install --no-cache-dir -r requirements.txt
 
 RUN python3.9 -m pip install jax[cpu]==0.4.18 jaxlib==0.4.18
 
+# Download the third-party DaL helper modules (not redistributed, see fetch_dal.py)
+RUN cd /app && python3.9 fetch_dal.py
+
 # Change directory to wluncert/
 WORKDIR /app/wluncert
 
