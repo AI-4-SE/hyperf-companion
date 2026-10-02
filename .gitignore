@@ -174,3 +174,7 @@ cython_debug/
 /experiment-code/wluncert/dal/utils/mlp_plain_model_tf2.py
 /experiment-code/wluncert/dal/utils/mlp_sparse_model_tf2.py
 /experiment-code/wluncert/dal/utils/runHINNPerf.py
+
+# TuxKConfig data (CC BY 4.0, Acher et al.): not redistributed, downloaded
+# from OpenML by experiment-code/wluncert/training-data/getTuxKConfig.py
+/experiment-code/wluncert/training-data/tuxkconfig_datasets/
