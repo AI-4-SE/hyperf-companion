@@ -1,3 +1,8 @@
+# Top-level Python requirements of the experiments (Python 3.10): the
+# requirements of the 2025 runs, adapted for CPU-only use (see DOCKER.md).
+# The Docker image installs the exact versions from requirements-lock.txt,
+# which was resolved from this file. Regenerate it after changing this file.
+
 # Data analysis & plotting
 pandas
 matplotlib==3.7.1              # Safe version compatible with numpy < 2
@@ -5,7 +10,7 @@ seaborn==0.13.1                # Matches matplotlib 3.7.x well
 graphviz
 networkx                       # Listed twice before, only keep once
 bokeh
-arviz~=0.15.1                  # For probabilistic visualization (NumPyro-compatible)
+arviz==0.16.1                  # Version reported in the paper; the 2025 file had arviz~=0.15.1
 pyarrow
 openpyxl==3.1.2                # For Excel export (used by pandas)
 
@@ -16,10 +21,10 @@ imbalanced_learn==0.12.0       # Needs sklearn <1.4 to avoid breaking changes
 doepy>=0.0.1                    # Design of experiments
 pymoo>=0.6.0.1                 # Multi-objective optimization
 joblib                         # Model serialization, used by sklearn and others
-tensorflow[and-cuda]==2.13.1   # Compatible with Python 3.10, still widely supported
+tensorflow-cpu==2.13.1         # CPU build; the 2025 file had tensorflow[and-cuda]==2.13.1 (use that for a GPU)
 #torch==2.1.2                   # Compatible with TF 2.13, avoids known ABI issues
-torch==2.1.0
-tensorrt==10.0.1               # Make sure your platform supports this version
+torch==2.1.0                   # Docker installs the CPU wheel 2.1.0+cpu from https://download.pytorch.org/whl/cpu
+# tensorrt==10.0.1 (GPU only) was listed here: not imported, and TF 2.13 expects TensorRT 8
 
 # NumPyro + JAX stack (carefully versioned!)
 #numpy==1.26.4                  # Last version before numpy 2.0 (critical for compatibility)
@@ -44,6 +49,5 @@ typing-extensions==4.5.0
 #typing-extensions<4.6.0
 openml~=0.9.0
 
-
-# Special dependency from GitHub (locked commit)
-pycosa @ git+https://github.com/smba/pycosa-toolbox@6a3632c448003347c203187dc94a15819ed46875#egg=pycosa
+# pycosa-toolbox (git+https://github.com/smba/pycosa-toolbox@6a3632c, AGPL-3.0)
+# was listed here, but no code imports it.

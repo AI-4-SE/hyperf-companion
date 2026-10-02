@@ -383,7 +383,6 @@ Copyright of the parts by the authors: 2024–2025 Johannes Dorn, Stefan Mühlba
 - **DaL:** The DaL baseline (`model_dal_no_pooling`, `model_dal_cpooling`) uses helper modules from [DaL-ext](https://github.com/ideas-labo/DaL-ext) by J. Gong, T. Chen et al. DaL-ext has no license, so these modules are not part of this repository. To download them at the pinned commit, run `python3 fetch_dal.py` in `experiment-code/` (the Docker build does this automatically). The downloaded files are not covered by our license. Without them, everything else works; only the two DaL models are unavailable.
 - `experiment-code/wluncert/deepperf.py` is our own re-implementation of DeepPerf (H. Ha, H. Zhang, ICSE 2019, https://doi.org/10.1109/ICSE.2019.00113).
 - The TuxKConfig data is not included. `experiment-code/wluncert/training-data/getTuxKConfig.py` downloads it from OpenML. Original dataset: M. Acher et al., https://doi.org/10.5281/zenodo.7433623 (CC BY 4.0).
-- [pycosa-toolbox](https://github.com/smba/pycosa-toolbox) (AGPL-3.0) is a Python dependency in `requirements.txt`. pip installs it; it is not part of this repository.
 
 The paper is published under CC BY-NC-ND 4.0. That license applies only to the paper, not to this repository.
 

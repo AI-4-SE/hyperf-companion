@@ -1,2 +1,15 @@
 .idea/
 venv/
+.venv/
+**/__pycache__/
+**/*.py[cod]
+
+# Local experiment output (the image creates empty folders)
+wluncert/results/
+wluncert/tmp/
+
+# Downloaded third-party files: the image fetches the DaL modules itself
+# (fetch_dal.py); TuxKConfig can be downloaded in the container if needed
+wluncert/dal/utils/*.py
+!wluncert/dal/utils/__init__.py
+wluncert/training-data/tuxkconfig_datasets/
