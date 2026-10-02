@@ -143,9 +143,9 @@ class SingleEnvData:
                     random_state=rnd,
                 )
         else:
-        df_train, df_test = train_test_split(
-            self.df, train_size=absolute_train_size, random_state=rnd
-        )
+            df_train, df_test = train_test_split(
+                self.df, train_size=absolute_train_size, random_state=rnd
+            )
 
         if max_test_samples_abs is not None and len(df_test) > max_test_samples_abs:
             df_test, _ = train_test_split(
