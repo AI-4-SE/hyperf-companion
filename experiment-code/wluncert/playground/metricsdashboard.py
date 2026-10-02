@@ -387,8 +387,8 @@ def draw_multitask_paper_plot(
         "mcmc-adaptive-shrinkage": "Bayesian",
         # "model_lasso_reg_no_pool": "Lasso",
         # "model_lasso_reg_cpool": "Lasso",
-        "model_lassocv_reg_no_pool": "$\\hat{\\Pi}^\\text{np}_\\text{Lasso}$",
-        "model_lassocv_reg_cpool": "$\\hat{\\Pi}^\\text{cp}_\\text{Lasso}$",
+        "model_lassocv_reg_no_pool": "$\\hat{\\Pi}^\\mathrm{np}_\\mathrm{Lasso}$",
+        "model_lassocv_reg_cpool": "$\\hat{\\Pi}^\\mathrm{cp}_\\mathrm{Lasso}$",
         # "dummy": "mean",
     }
     filtered_df = combined_df[combined_df[model_col].isin(wanted_models)]
@@ -426,9 +426,9 @@ def draw_multitask_paper_plot(
     }
     melted_df = melted_df.rename(columns=params_mapper)
 
-    bnp = "$\\tilde{\Pi}^\\text{np}$"
-    bpp = "$\\tilde{\\Pi}^\\text{pp}$"
-    bcp = "$\\tilde{\\Pi}^\\text{cp}$"
+    bnp = "$\\tilde{\Pi}^\\mathrm{np}$"
+    bpp = "$\\tilde{\\Pi}^\\mathrm{pp}$"
+    bcp = "$\\tilde{\\Pi}^\\mathrm{cp}$"
     melted_df[model_lbl].loc[
         (melted_df[model_lbl] == "Bayesian") & (melted_df[pooling_cat_lbl] == "no")
     ] = bnp
@@ -472,7 +472,7 @@ def draw_multitask_paper_plot(
         "2.000000": "$2 \\vert \\mathcal{O} \\vert$",
         "3.000000": "$3 \\vert \\mathcal{O} \\vert$",
         r"Subject System": "",
-        r"Relative Train Size": "$\\vert \\mathcal{D}^\text{train} \\vert$",
+        r"Relative Train Size": "$\\vert \\mathcal{D}^\\mathrm{train} \\vert$",
         r"\\\\ \& \& \& \& \& \& \& \& \& \& \& \& ": "",
         r" &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\": "",
     }
@@ -1054,9 +1054,9 @@ def draw_multitask_RF_comparison(
     }
     melted_df = melted_df.rename(columns=params_mapper)
 
-    bnp = "$\\tilde{\Pi}^\\text{np}$"
-    bpp = "$\\tilde{\\Pi}^\\text{pp}$"
-    bcp = "$\\tilde{\\Pi}^\\text{cp}$"
+    bnp = "$\\tilde{\Pi}^\\mathrm{np}$"
+    bpp = "$\\tilde{\\Pi}^\\mathrm{pp}$"
+    bcp = "$\\tilde{\\Pi}^\\mathrm{cp}$"
     melted_df[model_lbl].loc[
         (melted_df[model_lbl] == "Bayesian") & (melted_df[pooling_cat_lbl] == "no")
     ] = bnp
@@ -1090,7 +1090,7 @@ def draw_multitask_RF_comparison(
         "2.000000": "$2 \\vert \\mathcal{O} \\vert$",
         "3.000000": "$3 \\vert \\mathcal{O} \\vert$",
         r"Subject System": "",
-        r"Relative Train Size": "$\\vert \\mathcal{D}^\text{train} \\vert$",
+        r"Relative Train Size": "$\\vert \\mathcal{D}^\\mathrm{train} \\vert$",
         r"\\\\ \& \& \& \& \& \& \& \& \& \& \& \& ": "",
         r" &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\": "",
     }
@@ -1526,7 +1526,7 @@ def draw_multitask_large_comparison(
     # ensure consistent labelling between the table and the plot we map the
     # remaining Bayesian rows to the HyPerf label before dropping the pooling
     # category column.
-    bpp = "HyPerf ($\\tilde{\\Pi}^\\text{pp}$)"
+    bpp = "HyPerf ($\\tilde{\\Pi}^\\mathrm{pp}$)"
     unwanted_pooling = ["complete", "no"]
     time_df = time_df.loc[
         ~(
@@ -1578,9 +1578,9 @@ def draw_multitask_large_comparison(
         ~(is_bayesian & melted_df[pooling_cat_lbl].isin(unwanted_pooling))
     ]
 
-    bnp = "$\\tilde{\Pi}^\\text{np}$"
-    bpp = "HyPerf ($\\tilde{\\Pi}^\\text{pp}$)"
-    bcp = "$\\tilde{\\Pi}^\\text{cp}$"
+    bnp = "$\\tilde{\Pi}^\\mathrm{np}$"
+    bpp = "HyPerf ($\\tilde{\\Pi}^\\mathrm{pp}$)"
+    bcp = "$\\tilde{\\Pi}^\\mathrm{cp}$"
     melted_df[model_lbl].loc[
         (melted_df[model_lbl] == "Bayesian") & (melted_df[pooling_cat_lbl] == "no")
     ] = bnp
@@ -1611,7 +1611,7 @@ def draw_multitask_large_comparison(
         "2.000000": "$2 \\vert \\mathcal{O} \\vert$",
         "3.000000": "$3 \\vert \\mathcal{O} \\vert$",
         r"Subject System": "",
-        r"Relative Train Size": "$\\vert \\mathcal{D}^\text{train} \\vert$",
+        r"Relative Train Size": "$\\vert \\mathcal{D}^\\mathrm{train} \\vert$",
         r"\\\\ \& \& \& \& \& \& \& \& \& \& \& \& ": "",
         r" &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\": "",
     }
@@ -2152,7 +2152,7 @@ def plot_multitask(
         fig = plt.gcf()
         # fig.canvas.draw()
         time.sleep(0.1)
-        tmp_file = pdf_file_name
+        tmp_file = "streamlit-last-results-multitask.pdf"
         plt.savefig(tmp_file, bbox_inches="tight")
         fig.savefig("temp_plot.png", bbox_inches="tight", dpi=300)
         st.image("temp_plot.png")
