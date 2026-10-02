@@ -334,7 +334,7 @@ def main():
             patched[name] = text.encode("utf-8")
             if sha256(patched[name]) != FILES[name][1]:
                 raise FetchError("{}: unexpected result after patching".format(name))
-    except (FetchError, OSError, subprocess.CalledProcessError) as error:
+    except (FetchError, OSError, subprocess.CalledProcessError, tarfile.TarError) as error:
         print("ERROR: {}".format(error), file=sys.stderr)
         return 1
 
