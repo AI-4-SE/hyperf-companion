@@ -307,13 +307,13 @@ def main():
                     config_ok = True
     if not config_ok:
         st.error("please check config in sidebar")
-        exit(21)
+        st.stop()
     else:
         combined_df = replace_strings(combined_df)
         exp_types = combined_df["params.experiment-type"].unique()
         if len(exp_types) > 1:
             st.error("Not more than one experiment type supported!")
-            exit(22)
+            st.stop()
         else:
             total_pred_time_cost = int(combined_df["metrics.pred_time_cost"].sum())
             total_fitting_time_cost = int(

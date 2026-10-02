@@ -109,7 +109,7 @@ def main():
                     config_ok = True
     if not config_ok:
         st.error("please check config in sidebar")
-        exit(21)
+        st.stop()
     else:
 
         selected_systems = st.multiselect("Subselect software systems", results_list,
