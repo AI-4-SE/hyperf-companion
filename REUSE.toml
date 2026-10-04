@@ -35,19 +35,16 @@ path = "experiment-code/wluncert/training-data/dashboard-resources/**"
 SPDX-FileCopyrightText = "2023 Stefan Mühlbauer, Florian Sattler, Christian Kaltenecker, Johannes Dorn, Sven Apel, Norbert Siegmund"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
 
-# 4. Files of unclear provenance: excluded from the grants above, no rights
-#    granted (see LICENSES/LicenseRef-Unclear-Provenance.txt).
+# 4. The same data of Mühlbauer et al. (ICSE 2023), reformatted: options and
+#    measurements of each system merged into one table. Content verified to be
+#    identical to dashboard-resources/ (see THIRD_PARTY_NOTICES.md).
 [[annotations]]
 path = [
     "experiment-code/wluncert/training-data/batik.csv",
     "experiment-code/wluncert/training-data/dconvert.csv",
     "experiment-code/wluncert/training-data/h2.csv",
-    "experiment-code/wluncert/training-data/jadx.csv",
     "experiment-code/wluncert/training-data/jump3r.csv",
     "experiment-code/wluncert/training-data/kanzi.csv",
-    "experiment-code/wluncert/training-data/measurements_lrzip-0.651.csv",
-    "experiment-code/wluncert/training-data/measurements_xz-5.2.0.csv",
 ]
-precedence = "override"
-SPDX-FileCopyrightText = "NOASSERTION"
-SPDX-License-Identifier = "LicenseRef-Unclear-Provenance"
+SPDX-FileCopyrightText = "2023 Stefan Mühlbauer, Florian Sattler, Christian Kaltenecker, Johannes Dorn, Sven Apel, Norbert Siegmund"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
