@@ -1,0 +1,53 @@
+# Licensing information for this repository (REUSE Specification 3.3,
+# https://reuse.software/spec-3.3/). See also README.md (section "License")
+# and THIRD_PARTY_NOTICES.md.
+#
+# Order matters: if several [[annotations]] match a file, the LAST matching
+# annotation applies. The entries therefore go from general to specific.
+
+version = 1
+SPDX-PackageName = "hyperf-companion"
+SPDX-PackageDownloadLocation = "https://github.com/AI-4-SE/hyperf-companion"
+
+# 1. Default: code, scripts, documentation and configuration written by the
+#    authors.
+[[annotations]]
+path = "**"
+SPDX-FileCopyrightText = "2024-2025 Johannes Dorn, Stefan Mühlbauer, Stefan Jahns, Sven Apel, Norbert Siegmund"
+SPDX-License-Identifier = "MIT"
+
+# 2. Data and results produced by the authors.
+[[annotations]]
+path = [
+    "supplementary-material/**",
+    "experiment-code/wluncert/training-data/measurements_VP9_*.csv",
+    "experiment-code/wluncert/training-data/measurements_x265_*.csv",
+    "experiment-code/wluncert/training-data/performance-across-workloads-and-evolution/**",
+    "experiment-code/wluncert/training-data/artificial/**",
+]
+SPDX-FileCopyrightText = "2024-2025 Johannes Dorn, Stefan Mühlbauer, Stefan Jahns, Sven Apel, Norbert Siegmund"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# 3. Data from Mühlbauer et al., ICSE 2023, https://doi.org/10.5281/zenodo.7658046
+#    (see dashboard-resources/LICENSE.md).
+[[annotations]]
+path = "experiment-code/wluncert/training-data/dashboard-resources/**"
+SPDX-FileCopyrightText = "2023 Stefan Mühlbauer, Florian Sattler, Christian Kaltenecker, Johannes Dorn, Sven Apel, Norbert Siegmund"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+# 4. Files of unclear provenance: excluded from the grants above, no rights
+#    granted (see LICENSES/LicenseRef-Unclear-Provenance.txt).
+[[annotations]]
+path = [
+    "experiment-code/wluncert/training-data/batik.csv",
+    "experiment-code/wluncert/training-data/dconvert.csv",
+    "experiment-code/wluncert/training-data/h2.csv",
+    "experiment-code/wluncert/training-data/jadx.csv",
+    "experiment-code/wluncert/training-data/jump3r.csv",
+    "experiment-code/wluncert/training-data/kanzi.csv",
+    "experiment-code/wluncert/training-data/measurements_lrzip-0.651.csv",
+    "experiment-code/wluncert/training-data/measurements_xz-5.2.0.csv",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "NOASSERTION"
+SPDX-License-Identifier = "LicenseRef-Unclear-Provenance"
