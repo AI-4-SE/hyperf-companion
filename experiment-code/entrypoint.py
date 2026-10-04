@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import os
+import sys
 import time
 
 port1 = 8083
@@ -62,18 +63,18 @@ def run_RQ2_and_RQ3(jobs, training_set_size=None):
 
 def run_metrics_dashboard(blocking=True):
     cmd = ["streamlit", "run", "playground/metricsdashboard.py", "--server.port", str(port1),
-           "browser.gatherUsageStats", "False"]
+           "--browser.gatherUsageStats", "false"]
     run(cmd, blocking)
 
 
 def run_insights_dashboard(blocking=True):
     cmd = ["streamlit", "run", "playground/insights-dashboard.py", "--server.port", str(port2),
-           "browser.gatherUsageStats", "False"]
+           "--browser.gatherUsageStats", "false"]
     run(cmd, blocking)
 
 
 def run(cmd, blocking=True):
-    blocking_str = "BLOCKING" if blocking else "[ASYNC]"
+    blocking_str = "BLOCKING" if blocking else "ASYNC"
     print(f"[{blocking_str}] {' '.join(cmd)}")
     if blocking:
         subprocess.run(cmd, cwd=cwd_wluncert)
@@ -83,7 +84,9 @@ def run(cmd, blocking=True):
 
 def run_experiment(jobs=1, reps=1, store=False, training_set_size=None):
     # Construct the command for the experiment task
-    cmd = ["python3.9", "main.py", "--jobs", str(jobs), "--reps", str(reps)]
+    cmd = [sys.executable, "main.py", "--jobs", str(jobs)]
+    if reps is not None:  # otherwise main.py uses its default
+        cmd.extend(["--reps", str(reps)])
     if store:
         cmd.append("--store")
     if training_set_size is not None:
@@ -92,7 +95,7 @@ def run_experiment(jobs=1, reps=1, store=False, training_set_size=None):
     print(" ".join(cmd))
     # Run the constructed command
     run(cmd)
-    insights_cmd = ["python3.9", "modelinsights.py"]
+    insights_cmd = [sys.executable, "modelinsights.py"]
     run(insights_cmd)
 
 
