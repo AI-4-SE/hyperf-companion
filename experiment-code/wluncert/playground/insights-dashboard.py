@@ -91,7 +91,7 @@ def main():
                 #          "240317-14-51-05-aggregation-dNPobw6xky",
                 #          "240318-14-27-26-aggregation-WLFgXnWyqc",
                 #          "240319-11-56-40-aggregation-gn5W8tJhaY"],
-                default=[get_default_data_string(parent_folder)],
+                default=get_default_data_string(parent_folder),
             )
 
             if (
@@ -109,7 +109,7 @@ def main():
                     config_ok = True
     if not config_ok:
         st.error("please check config in sidebar")
-        exit(21)
+        st.stop()
     else:
 
         selected_systems = st.multiselect("Subselect software systems", results_list,
