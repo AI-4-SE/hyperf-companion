@@ -22,8 +22,19 @@ pdf_label = "PDF download"
 
 
 def get_subfolders(parent_folder):
+    if not os.path.isdir(parent_folder):
+        st.error(f"Folder not found: {parent_folder}")
+        return []
     subfolders = [f.path for f in os.scandir(parent_folder) if f.is_dir()]
     return subfolders
+
+
+def get_default_data_string(parent):
+    # result folders start with a yymmdd-HH-MM-SS time stamp: preselect the newest
+    if not os.path.isdir(parent):
+        return None
+    names = sorted(f.name for f in os.scandir(parent) if f.is_dir())
+    return names[-1] if names else None
 
 
 bayes_palette = ["#47AEED", "#398CBF", "#2F729C"]
@@ -268,7 +279,7 @@ def main():
         st.write("## Folder Selection")
         parent_folder = st.text_input(
             "Enter the path of the parent folder",
-            value="/home/jdorn/results/localflow/jdorn-multilevel-eval/",
+            value="./results/localflow/multilevel-eval/",
         )
         if parent_folder:
             subfolders = get_subfolders(parent_folder)
@@ -278,18 +289,7 @@ def main():
             selected_subfolders = st.multiselect(
                 "Select Subfolders",
                 folder_names,
-                # default=["240316-20-16-41-aggregation-bWn627g4jN",
-                #          "240317-14-51-05-aggregation-dNPobw6xky",
-                #          "240318-14-27-26-aggregation-WLFgXnWyqc",
-                #          "240319-11-56-40-aggregation-gn5W8tJhaY"],
-                default=[
-                    # "240321-19-59-19-aggregation-bTLYxz3uFg", # old bayesian multitask
-                    #  # "240319-22-38-13-aggregation-dwnJojszkX", # new lasso grid
-                    #  "240322-13-08-04-aggregation-NKUie5gttU", # 0.9 CI
-                    "240530-04-25-16-aggregation-fufenzJcNa",
-                    # "240530-16-44-27-aggregation-kmTX5kus7v",
-                    "240530-18-50-45-aggregation-5k3mM6CkV4",
-                ],
+                default=get_default_data_string(parent_folder),
             )
 
             if (
@@ -307,13 +307,13 @@ def main():
                     config_ok = True
     if not config_ok:
         st.error("please check config in sidebar")
-        exit(21)
+        st.stop()
     else:
         combined_df = replace_strings(combined_df)
         exp_types = combined_df["params.experiment-type"].unique()
         if len(exp_types) > 1:
             st.error("Not more than one experiment type supported!")
-            exit(22)
+            st.stop()
         else:
             total_pred_time_cost = int(combined_df["metrics.pred_time_cost"].sum())
             total_fitting_time_cost = int(
@@ -387,8 +387,8 @@ def draw_multitask_paper_plot(
         "mcmc-adaptive-shrinkage": "Bayesian",
         # "model_lasso_reg_no_pool": "Lasso",
         # "model_lasso_reg_cpool": "Lasso",
-        "model_lassocv_reg_no_pool": "$\\hat{\\Pi}^\\text{np}_\\text{Lasso}$",
-        "model_lassocv_reg_cpool": "$\\hat{\\Pi}^\\text{cp}_\\text{Lasso}$",
+        "model_lassocv_reg_no_pool": "$\\hat{\\Pi}^\\mathrm{np}_\\mathrm{Lasso}$",
+        "model_lassocv_reg_cpool": "$\\hat{\\Pi}^\\mathrm{cp}_\\mathrm{Lasso}$",
         # "dummy": "mean",
     }
     filtered_df = combined_df[combined_df[model_col].isin(wanted_models)]
@@ -426,9 +426,9 @@ def draw_multitask_paper_plot(
     }
     melted_df = melted_df.rename(columns=params_mapper)
 
-    bnp = "$\\tilde{\Pi}^\\text{np}$"
-    bpp = "$\\tilde{\\Pi}^\\text{pp}$"
-    bcp = "$\\tilde{\\Pi}^\\text{cp}$"
+    bnp = "$\\tilde{\Pi}^\\mathrm{np}$"
+    bpp = "$\\tilde{\\Pi}^\\mathrm{pp}$"
+    bcp = "$\\tilde{\\Pi}^\\mathrm{cp}$"
     melted_df[model_lbl].loc[
         (melted_df[model_lbl] == "Bayesian") & (melted_df[pooling_cat_lbl] == "no")
     ] = bnp
@@ -472,7 +472,7 @@ def draw_multitask_paper_plot(
         "2.000000": "$2 \\vert \\mathcal{O} \\vert$",
         "3.000000": "$3 \\vert \\mathcal{O} \\vert$",
         r"Subject System": "",
-        r"Relative Train Size": "$\\vert \\mathcal{D}^\text{train} \\vert$",
+        r"Relative Train Size": "$\\vert \\mathcal{D}^\\mathrm{train} \\vert$",
         r"\\\\ \& \& \& \& \& \& \& \& \& \& \& \& ": "",
         r" &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\": "",
     }
@@ -1054,9 +1054,9 @@ def draw_multitask_RF_comparison(
     }
     melted_df = melted_df.rename(columns=params_mapper)
 
-    bnp = "$\\tilde{\Pi}^\\text{np}$"
-    bpp = "$\\tilde{\\Pi}^\\text{pp}$"
-    bcp = "$\\tilde{\\Pi}^\\text{cp}$"
+    bnp = "$\\tilde{\Pi}^\\mathrm{np}$"
+    bpp = "$\\tilde{\\Pi}^\\mathrm{pp}$"
+    bcp = "$\\tilde{\\Pi}^\\mathrm{cp}$"
     melted_df[model_lbl].loc[
         (melted_df[model_lbl] == "Bayesian") & (melted_df[pooling_cat_lbl] == "no")
     ] = bnp
@@ -1090,7 +1090,7 @@ def draw_multitask_RF_comparison(
         "2.000000": "$2 \\vert \\mathcal{O} \\vert$",
         "3.000000": "$3 \\vert \\mathcal{O} \\vert$",
         r"Subject System": "",
-        r"Relative Train Size": "$\\vert \\mathcal{D}^\text{train} \\vert$",
+        r"Relative Train Size": "$\\vert \\mathcal{D}^\\mathrm{train} \\vert$",
         r"\\\\ \& \& \& \& \& \& \& \& \& \& \& \& ": "",
         r" &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\": "",
     }
@@ -1526,7 +1526,7 @@ def draw_multitask_large_comparison(
     # ensure consistent labelling between the table and the plot we map the
     # remaining Bayesian rows to the HyPerf label before dropping the pooling
     # category column.
-    bpp = "HyPerf ($\\tilde{\\Pi}^\\text{pp}$)"
+    bpp = "HyPerf ($\\tilde{\\Pi}^\\mathrm{pp}$)"
     unwanted_pooling = ["complete", "no"]
     time_df = time_df.loc[
         ~(
@@ -1578,9 +1578,9 @@ def draw_multitask_large_comparison(
         ~(is_bayesian & melted_df[pooling_cat_lbl].isin(unwanted_pooling))
     ]
 
-    bnp = "$\\tilde{\Pi}^\\text{np}$"
-    bpp = "HyPerf ($\\tilde{\\Pi}^\\text{pp}$)"
-    bcp = "$\\tilde{\\Pi}^\\text{cp}$"
+    bnp = "$\\tilde{\Pi}^\\mathrm{np}$"
+    bpp = "HyPerf ($\\tilde{\\Pi}^\\mathrm{pp}$)"
+    bcp = "$\\tilde{\\Pi}^\\mathrm{cp}$"
     melted_df[model_lbl].loc[
         (melted_df[model_lbl] == "Bayesian") & (melted_df[pooling_cat_lbl] == "no")
     ] = bnp
@@ -1611,7 +1611,7 @@ def draw_multitask_large_comparison(
         "2.000000": "$2 \\vert \\mathcal{O} \\vert$",
         "3.000000": "$3 \\vert \\mathcal{O} \\vert$",
         r"Subject System": "",
-        r"Relative Train Size": "$\\vert \\mathcal{D}^\text{train} \\vert$",
+        r"Relative Train Size": "$\\vert \\mathcal{D}^\\mathrm{train} \\vert$",
         r"\\\\ \& \& \& \& \& \& \& \& \& \& \& \& ": "",
         r" &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\": "",
     }
@@ -2152,7 +2152,7 @@ def plot_multitask(
         fig = plt.gcf()
         # fig.canvas.draw()
         time.sleep(0.1)
-        tmp_file = pdf_file_name
+        tmp_file = "streamlit-last-results-multitask.pdf"
         plt.savefig(tmp_file, bbox_inches="tight")
         fig.savefig("temp_plot.png", bbox_inches="tight", dpi=300)
         st.image("temp_plot.png")

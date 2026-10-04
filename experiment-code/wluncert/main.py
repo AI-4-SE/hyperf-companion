@@ -37,8 +37,6 @@ from experiment import (
     EXPERIMENT_NAME,
 )
 
-
-print(os.environ)
 import localflow as mlflow
 from data import (
     DataLoaderStandard,
