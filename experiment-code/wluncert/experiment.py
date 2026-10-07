@@ -1,4 +1,5 @@
 import copy
+import gc
 import itertools
 import os.path
 import random
@@ -10,7 +11,7 @@ import localflow as mlflow
 import numpy as np
 
 import pandas as pd
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed, parallel_backend
 from tqdm import tqdm
 import uuid
 from analysis import ModelEvaluation
@@ -164,6 +165,7 @@ class Replication:
         replication_lbl="last-experiment",
         plot=False,
         do_transfer_task=False,
+        max_test_samples_abs=None,
     ):
         self.replication_lbl = get_date_time_uuid() + "-" + replication_lbl
         self.progress_bar = None
@@ -192,7 +194,7 @@ class Replication:
         """Return True if any selected dataset is the TuxKconfig dataset."""
         return any("tuxkconfig" in lbl for lbl in self.data_providers)
 
-   def provision_experiment(self, args):
+    def provision_experiment(self, args):
         model_lbl, model_proto, data_lbl, data_set, train_size, rnd = args
         print(
             f"provisioning model={model_lbl} data={data_lbl} train_size={train_size} rnd={rnd}",
@@ -287,14 +289,13 @@ class Replication:
 
             print("Provisioned experiments", flush=True)
 
-        random.seed(self.rnds[0])
-        for task_type in tasks:
-            random.shuffle(tasks[task_type])
-            print(f"Planning {self.n_jobs} jobs")
+            random.seed(self.rnds[0])
+            for task_type in tasks:
+                random.shuffle(tasks[task_type])
+                print(f"Planning {self.n_jobs} jobs")
 
                 task_kwargs = {
                     "n_jobs": self.n_jobs,
-                    "prefer": "threads",
                     "verbose": 10,
                 }
                 Parallel(**task_kwargs)(

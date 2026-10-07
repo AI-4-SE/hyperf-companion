@@ -1,0 +1,104 @@
+# Citation metadata, see https://citation-file-format.github.io/
+#
+# TODO: Once a release of this repository is archived on Zenodo, add its DOI:
+#   doi: 10.5281/zenodo.XXXXXXX
+#   version: "<release tag>"
+#   date-released: "YYYY-MM-DD"
+
+cff-version: 1.2.0
+message: >-
+  If you use this software or data, please cite the paper given under
+  preferred-citation, as well as the datasets listed under references
+  if you use them.
+type: software
+title: >-
+  HyPerf: Replication package for "Bayesian Multi-Level Performance Models
+  for Multi-Factor Variability of Configurable Software Systems"
+authors:
+  - family-names: Dorn
+    given-names: Johannes
+  - family-names: Mühlbauer
+    given-names: Stefan
+  - family-names: Jahns
+    given-names: Stefan
+  - family-names: Apel
+    given-names: Sven
+  - family-names: Siegmund
+    given-names: Norbert
+repository-code: "https://github.com/AI-4-SE/hyperf-companion"
+license: MIT
+keywords:
+  - configurable software systems
+  - performance modeling
+  - Bayesian multi-level models
+  - workloads
+preferred-citation:
+  type: conference-paper
+  title: >-
+    Bayesian Multi-Level Performance Models for Multi-Factor Variability of
+    Configurable Software Systems
+  authors:
+    - family-names: Dorn
+      given-names: Johannes
+    - family-names: Mühlbauer
+      given-names: Stefan
+    - family-names: Jahns
+      given-names: Stefan
+    - family-names: Apel
+      given-names: Sven
+    - family-names: Siegmund
+      given-names: Norbert
+  collection-title: >-
+    Proceedings of the 48th IEEE/ACM International Conference on Software
+    Engineering (ICSE '26)
+  year: 2026
+  doi: 10.1145/3744916.3773131
+references:
+  - type: data
+    title: >-
+      Analyzing the Impact of Workloads on Modeling the Performance of
+      Configurable Software Systems (Supplementary Material)
+    authors:
+      - family-names: Mühlbauer
+        given-names: Stefan
+      - family-names: Sattler
+        given-names: Florian
+      - family-names: Kaltenecker
+        given-names: Christian
+      - family-names: Dorn
+        given-names: Johannes
+      - family-names: Apel
+        given-names: Sven
+      - family-names: Siegmund
+        given-names: Norbert
+    year: 2023
+    version: "1.2"
+    doi: 10.5281/zenodo.7658046
+    notes: >-
+      Supplementary material of the ICSE 2023 paper
+      (https://doi.org/10.1109/ICSE48619.2023.00176). A subset is included in
+      experiment-code/wluncert/training-data/dashboard-resources/ under
+      CC BY-SA 4.0.
+  - type: data
+    title: >-
+      Build and measurements of Linux kernel configurations across different
+      versions
+    authors:
+      - family-names: Acher
+        given-names: Mathieu
+      - family-names: Alves Pereira
+        given-names: Juliana
+      - family-names: Martin
+        given-names: Hugo
+      - family-names: Lesoil
+        given-names: Luc
+      - family-names: Jézéquel
+        given-names: Jean-Marc
+      - family-names: Khelladi
+        given-names: Djamel Eddine
+    year: 2022
+    doi: 10.5281/zenodo.7433623
+    license: CC-BY-4.0
+    notes: >-
+      TuxKConfig data. Not included in this repository; downloaded from
+      OpenML by experiment-code/wluncert/training-data/getTuxKConfig.py.

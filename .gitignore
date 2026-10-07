@@ -161,3 +161,20 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
+
+# Third-party DaL helper modules (DaL-ext, no license): not redistributed,
+# downloaded by experiment-code/fetch_dal.py
+/experiment-code/wluncert/dal/utils/HINNPerf_args.py
+/experiment-code/wluncert/dal/utils/HINNPerf_data_preproc.py
+/experiment-code/wluncert/dal/utils/HINNPerf_model_runner.py
+/experiment-code/wluncert/dal/utils/HINNPerf_models.py
+/experiment-code/wluncert/dal/utils/adapting_depth.py
+/experiment-code/wluncert/dal/utils/general.py
+/experiment-code/wluncert/dal/utils/hyperparameter_tuning.py
+/experiment-code/wluncert/dal/utils/mlp_plain_model_tf2.py
+/experiment-code/wluncert/dal/utils/mlp_sparse_model_tf2.py
+/experiment-code/wluncert/dal/utils/runHINNPerf.py
+
+# TuxKConfig data (CC BY 4.0, Acher et al.): not redistributed, downloaded
+# from OpenML by experiment-code/wluncert/training-data/getTuxKConfig.py
+/experiment-code/wluncert/training-data/tuxkconfig_datasets/

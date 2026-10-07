@@ -15,7 +15,14 @@ from analysis import Analysis
 import matplotlib
 
 from deepperf import DeepPerfModel
-from dal import DaLRegressor
+
+try:
+    from dal import DaLRegressor
+except ModuleNotFoundError as dal_error:  # DaL code is fetched separately
+    if "dal.utils" not in (dal_error.name or ""):
+        raise
+    DaLRegressor = None
+    print(f"{dal_error} Until then, model_dal_no_pooling and model_dal_cpooling are unavailable.")
 
 
 # must be run before any JAX imports
@@ -30,8 +37,6 @@ from experiment import (
     EXPERIMENT_NAME,
 )
 
-
-print(os.environ)
 import localflow as mlflow
 from data import (
     DataLoaderStandard,
@@ -269,11 +274,14 @@ def get_all_models(debug, n_jobs, plot, do_store=False):
         deep_perf_proto, preprocessings=[Standardizer()]
     )
 
-    dal_proto = DaLRegressor()
-    model_dal_no_pooling = NoPoolingEnvModel(dal_proto, preprocessings=[Standardizer()])
-    model_dal_cpooling = CompletePoolingEnvModel(
-        dal_proto, preprocessings=[Standardizer()]
-    )
+    if DaLRegressor is not None:
+        dal_proto = DaLRegressor()
+        model_dal_no_pooling = NoPoolingEnvModel(dal_proto, preprocessings=[Standardizer()])
+        model_dal_cpooling = CompletePoolingEnvModel(
+            dal_proto, preprocessings=[Standardizer()]
+        )
+    else:  # DaL not fetched (python3 fetch_dal.py): models unavailable
+        model_dal_no_pooling = model_dal_cpooling = None
 
     # model_lin_reg_poly = Poly
     dummy_proto = DummyRegressor()
